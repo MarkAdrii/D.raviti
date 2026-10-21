@@ -44,3 +44,11 @@ description='''${mod_description}'''
     versionRange="*"
     ordering="NONE"
     side="BOTH"
+
+# Opcional: con Photon instalado los efectos son los de Photon (assets/draviti/fx); sin él, los de Lodestone
+[[dependencies.${mod_id}]]
+    modId="photon"
+    mandatory=false
+    versionRange="*"
+    ordering="AFTER"
+    side="CLIENT"

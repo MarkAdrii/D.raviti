@@ -47,11 +47,18 @@ public final class Fx {
     public static final int ABSORB = 26;
     /** Fin del Overdrive. */
     public static final int OVERDRIVE_OFF = 27;
+    /** Carga de la transformación (antes del estallido): a = 1 forma completa. */
+    public static final int OVERDRIVE_CHARGE = 28;
+    /** Vuelo sónico: estampido en pos hacia dir. */
+    public static final int SONIC_BOOM = 29;
+    /** Dash lateral en dir. */
+    public static final int DASH = 30;
 
     /** Animaciones (assets/draviti/player_animation/NOMBRE.json). "stop" para la que esté sonando. */
     public static final String[] ANIMATIONS = {
             "stop", "gravity_punch", "palm_ground", "throw", "spin_kick", "barrage",
-            "slam", "charge", "overdrive", "point_down", "dive_kick", "raise_sky", "float"
+            "slam", "charge", "overdrive", "point_down", "dive_kick", "raise_sky", "float",
+            "transform", "transform_full", "sonic_fly"
     };
 
     public static int anim(String name) {

@@ -32,6 +32,10 @@ public final class PowerManager {
         for (Power p : d.getPowers())
             for (Ability a : p.abilities())
                 if (d.state(p, a).enabled) active.add(PowerData.key(p, a));
+        // Que los demás sepan que tiene el poder (marca del Ether Gear en el brazo) y si va en vuelo sónico
+        for (Power p : d.getPowers()) active.add(p.id() + "/_has");
+        if (com.markadrii.draviti.gravity.GravityAbilities.SONIC.contains(player.getUUID()))
+            active.add(com.markadrii.draviti.gravity.Gravity.POWER_ID + "/vuelo_sonico");
         return new VisualStatePacket(player.getId(), active);
     }
 

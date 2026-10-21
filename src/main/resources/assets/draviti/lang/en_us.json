@@ -36,5 +36,7 @@
   "command.draviti.given": "Gave %s to %s player(s)",
   "command.draviti.removed": "Removed %s from %s player(s)",
   "command.draviti.energy": "Energy set to %s",
-  "command.draviti.none": "%s has no D.raviti powers"
+  "command.draviti.none": "%s has no D.raviti powers",
+  "message.draviti.blocks_on": "Techniques break blocks",
+  "message.draviti.blocks_off": "Techniques no longer break blocks"
 }

@@ -25,6 +25,8 @@ public class PowerData {
     private final Map<String, Integer> energy = new HashMap<>();
     /** Ha cambiado algo que el cliente tiene que ver (energía): se envía al final del tick. No se guarda. */
     public boolean dirty;
+    /** Las técnicas rompen bloques (se cambia pulsando Shift tres veces seguidas). */
+    public boolean breakBlocks = true;
 
     public static String key(Power power, Ability ability) {
         return power.id() + "/" + ability.id();
@@ -74,6 +76,7 @@ public class PowerData {
         other.states.forEach((k, v) -> states.put(k, v.copy()));
         energy.clear();
         energy.putAll(other.energy);
+        breakBlocks = other.breakBlocks;
     }
 
     // ---- NBT ----
@@ -96,6 +99,7 @@ public class PowerData {
         CompoundTag en = new CompoundTag();
         energy.forEach(en::putInt);
         tag.put("Energy", en);
+        tag.putBoolean("BreakBlocks", breakBlocks);
         return tag;
     }
 
@@ -121,6 +125,7 @@ public class PowerData {
         }
         CompoundTag en = tag.getCompound("Energy");
         for (String k : en.getAllKeys()) energy.put(k, en.getInt(k));
+        breakBlocks = !tag.contains("BreakBlocks") || tag.getBoolean("BreakBlocks");
     }
 
     // ---- Red ----

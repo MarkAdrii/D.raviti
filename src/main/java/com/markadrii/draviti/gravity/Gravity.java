@@ -71,11 +71,20 @@ public final class Gravity {
     public static boolean overdrive(Player p) { return active(p, "overdrive"); }
     public static boolean fullOverdrive(Player p) { return active(p, "overdrive_completo"); }
 
-    /** Multiplicador de fuerza: normal 1, Overdrive 1.5, Overdrive completo 2. */
+    /** Forma: 0 normal (turquesa), 1 Overdrive (turquesa, más grande), 2 Overdrive completo (morado, devastador). */
+    public static int tier(Player p) {
+        if (fullOverdrive(p)) return 2;
+        return overdrive(p) ? 1 : 0;
+    }
+
+    /** Multiplicador de daño: normal 1, Overdrive 1.6, Overdrive completo 2.4. */
     public static float mult(Player p) {
-        if (fullOverdrive(p)) return 2.0F;
-        if (overdrive(p)) return 1.5F;
-        return 1.0F;
+        return switch (tier(p)) { case 2 -> 2.4F; case 1 -> 1.6F; default -> 1.0F; };
+    }
+
+    /** Multiplicador de tamaño (alcance, radios, cráteres): normal 1, Overdrive 1.3, completo 1.7. */
+    public static float area(Player p) {
+        return switch (tier(p)) { case 2 -> 1.7F; case 1 -> 1.3F; default -> 1.0F; };
     }
 
     // ------------------------------------------------------------------ energía
@@ -253,6 +262,8 @@ public final class Gravity {
      */
     public static void crater(ServerPlayer p, Vec3 center, double radius, double depthFactor) {
         if (!CommonConfig.breakBlocks() || radius < 0.5) return;
+        PowerData pd = data(p);
+        if (pd != null && !pd.breakBlocks) return;
         ServerLevel level = p.serverLevel();
         float max = CommonConfig.maxHardness();
         int r = (int) Math.ceil(radius);
@@ -298,7 +309,7 @@ public final class Gravity {
 
     /** Efecto pegado a otra entidad (Pesado, Ingrávido...). */
     public static void fxOn(ServerPlayer p, int type, Entity target, float a, float b) {
-        FxPacket.send(p.serverLevel(), type, target, target.position(), a, b);
+        FxPacket.send(p.serverLevel(), type, target, target.position(), Vec3.ZERO, a, b, tier(p));
     }
 
     public static void anim(ServerPlayer p, String name) {

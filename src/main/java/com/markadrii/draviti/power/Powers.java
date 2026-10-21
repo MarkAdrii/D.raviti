@@ -40,13 +40,16 @@ public final class Powers {
         // ---------------- Dios de la Gravedad (Satan Gravity de Shiki Granbell, Edens Zero) ----------------
         // Barra: 4 listas de 5 (X para cambiar). Éter (morado) para las técnicas y energía cinética (dorada) para
         // Impacto Gravitatorio.
-        create("gravity").icon("gui/powers/gravity.png").color(0xA45CFF).bar("gui/ability_bars/gravity.png")
-                .energyBar(Gravity.ETHER, 0xA45CFF, Gravity.ETHER_MAX)
+        create("gravity").icon("gui/powers/gravity.png").color(0x7FE6C8).bar("gui/ability_bars/gravity.png")
+                .energyBar(Gravity.ETHER, 0x7FE6C8, Gravity.ETHER_MAX)
                 .energyBar(Gravity.KINETIC, 0xF2C94C, Gravity.KINETIC_MAX)
 
                 // Lista 1: Satan Gravity y los golpes básicos
                 .add(Ability.builder("ingravidez", TOGGLE).index(0).cooldown(20).color(BarColor.LIGHT_BLUE).icon(icon("ingravidez"))
-                        .stat("ether_cost", 20).stat("ether_per_second", 8).behavior(GravityAbilities.FLOAT))
+                        .stat("ether_cost", 20).stat("ether_per_second", 8)
+                        .stat("sonic_speed", 2.2).stat("sonic_ether_per_second", 40).stat("sonic_damage", 8)
+                        .stat("dash_speed", 1.7).stat("dash_ether_cost", 25)
+                        .behavior(GravityAbilities.FLOAT))
                 .add(Ability.builder("puno_gravitatorio", ACTION).index(1).cooldown(30).color(BarColor.PURPLE).icon(icon("puno_gravitatorio"))
                         .stat("ether_cost", 60).stat("damage", 14).stat("range", 5).stat("knockback", 2.6).stat("crater", 2.5)
                         .behavior(GravityAbilities.GRAVITY_FIST))

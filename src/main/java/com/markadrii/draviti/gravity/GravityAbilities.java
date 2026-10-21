@@ -30,6 +30,8 @@ public final class GravityAbilities {
     /** Jugadores que no reciben daño de caída hasta cierto tick (Cometa, Placaje, Impacto en el aire). */
     public static final Map<UUID, Integer> SAFE_FALL = new HashMap<>();
     private static final Map<UUID, Integer> FRENZY = new HashMap<>();
+    /** Jugadores en vuelo sónico (Ingravidez + W dos veces en el aire). */
+    public static final java.util.Set<UUID> SONIC = new java.util.HashSet<>();
     private static final Map<UUID, Vec3> FIELD_CENTER = new HashMap<>();
     private static final Map<UUID, GravitySphereEntity> CHARGING = new HashMap<>();
     private static final Map<UUID, Integer> CHARGE_TICKS = new HashMap<>();
@@ -83,7 +85,8 @@ public final class GravityAbilities {
         return f.lengthSqr() < 1.0E-4 ? new Vec3(0, 0, 1) : f.normalize();
     }
 
-    static double sqrtMult(ServerPlayer p) { return Math.sqrt(Gravity.mult(p)); }
+    /** Tamaño de las técnicas según la forma (Overdrive más grande, completo aún más). */
+    static double sqrtMult(ServerPlayer p) { return Gravity.area(p); }
 
     // =====================================================================================
     // Satan Gravity
@@ -121,6 +124,7 @@ public final class GravityAbilities {
 
         @Override
         public void onDeactivate(ServerPlayer p, Ability a) {
+            GravityMovement.stopSonic(p);
             if (!p.isCreative() && !p.isSpectator()) {
                 p.getAbilities().mayfly = false;
                 p.getAbilities().flying = false;
@@ -588,7 +592,7 @@ public final class GravityAbilities {
             float charge = Math.min(1F, t / (float) a.statI("charge_ticks"));
             float m = Gravity.mult(p);
             s.setStats(a.statF("damage") * (0.35F + 0.65F * charge) * m,
-                    (float) (a.stat("radius") * (0.5 + charge) * Math.sqrt(m)), (float) (1.6 + charge * 1.6));
+                    (float) (a.stat("radius") * (0.5 + charge) * Gravity.area(p)), (float) (1.6 + charge * 1.6));
             s.launch(p.getLookAngle(), a.stat("speed"));
             Gravity.anim(p, "gravity_punch");
             Gravity.glow(p, Limb.RIGHT_ARM, 10);
@@ -642,7 +646,7 @@ public final class GravityAbilities {
             GravitySphereEntity s = CHARGING.remove(p.getUUID());
             if (s == null || s.isRemoved()) return;
             float m = Gravity.mult(p);
-            s.setStats(a.statF("damage") * m, (float) (a.stat("radius") * Math.sqrt(m)), 2.5F);
+            s.setStats(a.statF("damage") * m, (float) (a.stat("radius") * Gravity.area(p)), 2.5F);
             Vec3 target = Gravity.lookPoint(p, a.stat("range"));
             s.launch(target.subtract(s.position()), a.stat("speed"));
             Gravity.anim(p, "slam");
@@ -654,20 +658,51 @@ public final class GravityAbilities {
     // Overdrive
     // =====================================================================================
 
+    /** Ticks que dura la carga de la transformación antes del estallido (el aspecto aparece al final). */
+    public static final int TRANSFORM_TICKS = 24;
+
+    /**
+     * Transformación: se encoge concentrando el éter (no se puede mover), la tierra tiembla cada vez más y al final
+     * estalla con el nuevo aspecto, empujando todo lo de alrededor.
+     */
+    static void transform(ServerPlayer p, boolean full) {
+        Gravity.anim(p, full ? "transform_full" : "transform");
+        Gravity.fx(p, Fx.OVERDRIVE_CHARGE, p.position(), full ? 1 : 0, 0);
+        Gravity.glow(p, Limb.BOTH_ARMS, TRANSFORM_TICKS);
+        p.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, TRANSFORM_TICKS, 6, false, false));
+        Gravity.sound(p, p.position(), SoundEvents.WARDEN_HEARTBEAT, 2F, 0.6F);
+        Gravity.sound(p, p.position(), SoundEvents.BEACON_POWER_SELECT, 1.5F, full ? 0.5F : 0.8F);
+        Tasks.start(p, t -> {
+            if (t % 6 == 0 && t < TRANSFORM_TICKS) {
+                Gravity.shake(p, p.position(), 0.3F + t / (float) TRANSFORM_TICKS * (full ? 1.2F : 0.7F), 8);
+                Gravity.sound(p, p.position(), SoundEvents.WARDEN_HEARTBEAT, 1.5F, 0.6F + t * 0.02F);
+            }
+            if (t < TRANSFORM_TICKS) return false;
+            Gravity.fx(p, Fx.OVERDRIVE, p.position(), full ? 1 : 0, 0);
+            Gravity.fx(p, Fx.SHOCKWAVE, p.position(), full ? 9 : 6, 0);
+            Gravity.shake(p, p.position(), full ? 3F : 1.6F, full ? 34 : 20);
+            if (full) {
+                Gravity.sound(p, p.position(), SoundEvents.WITHER_SPAWN, 0.8F, 0.6F);
+                Gravity.sound(p, p.position(), SoundEvents.WARDEN_ROAR, 1.4F, 0.7F);
+            } else {
+                Gravity.sound(p, p.position(), SoundEvents.BEACON_ACTIVATE, 1.5F, 0.8F);
+                Gravity.sound(p, p.position(), SoundEvents.WARDEN_ROAR, 0.8F, 1.4F);
+            }
+            Gravity.sound(p, p.position(), SoundEvents.GENERIC_EXPLODE, full ? 2F : 1F, 0.6F);
+            for (LivingEntity e : Gravity.around(p, p.position(), full ? 7 : 4.5))
+                Gravity.launchFrom(e, p.position(), full ? 1.8 : 1.0, full ? 0.6 : 0.35);
+            if (full) Gravity.crater(p, p.position().subtract(0, 0.5, 0), 2.5, 0.5);
+            return true;
+        });
+    }
+
     /** Overdrive: el pelo y la piel se aclaran, salen marcas de éter y cuernos de energía; fuerza y técnicas al máximo. */
     public static final AbilityBehavior OVERDRIVE = new AbilityBehavior() {
         @Override
         public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.hasEther(p, a.stat("min_ether")); }
 
         @Override
-        public void onActivate(ServerPlayer p, Ability a) {
-            Gravity.anim(p, "overdrive");
-            Gravity.fx(p, Fx.OVERDRIVE, p.position(), 0, 0);
-            Gravity.shake(p, p.position(), 1.2F, 16);
-            Gravity.sound(p, p.position(), SoundEvents.BEACON_ACTIVATE, 1.5F, 0.8F);
-            Gravity.sound(p, p.position(), SoundEvents.WARDEN_ROAR, 0.7F, 1.4F);
-            for (LivingEntity e : Gravity.around(p, p.position(), 4)) Gravity.launchFrom(e, p.position(), 0.9, 0.3);
-        }
+        public void onActivate(ServerPlayer p, Ability a) { transform(p, false); }
 
         @Override
         public void tick(ServerPlayer p, Ability a, int t) {
@@ -693,14 +728,7 @@ public final class GravityAbilities {
         public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.hasEther(p, a.stat("min_ether")); }
 
         @Override
-        public void onActivate(ServerPlayer p, Ability a) {
-            Gravity.anim(p, "overdrive");
-            Gravity.fx(p, Fx.OVERDRIVE, p.position(), 1, 0);
-            Gravity.shake(p, p.position(), 2.5F, 30);
-            Gravity.sound(p, p.position(), SoundEvents.WITHER_SPAWN, 0.8F, 0.6F);
-            Gravity.sound(p, p.position(), SoundEvents.WARDEN_ROAR, 1.2F, 0.8F);
-            for (LivingEntity e : Gravity.around(p, p.position(), 6)) Gravity.launchFrom(e, p.position(), 1.6, 0.5);
-        }
+        public void onActivate(ServerPlayer p, Ability a) { transform(p, true); }
 
         @Override
         public void tick(ServerPlayer p, Ability a, int t) {
@@ -742,5 +770,6 @@ public final class GravityAbilities {
         if (s != null && s.held()) s.discard();
         CHARGE_TICKS.remove(id);
         SAFE_FALL.remove(id);
+        SONIC.remove(id);
     }
 }

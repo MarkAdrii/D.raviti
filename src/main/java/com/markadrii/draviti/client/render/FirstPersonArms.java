@@ -37,7 +37,8 @@ public final class FirstPersonArms {
         boolean right = event.getArm() == HumanoidArm.RIGHT;
         float glow = ClientVisuals.glow(player, right ? Limb.RIGHT_ARM : Limb.LEFT_ARM);
         boolean od = Gravity.overdrive(player), full = Gravity.fullOverdrive(player);
-        if (glow <= 0 && !od && !full) return;
+        boolean mark = right && EtherGearLayer.hasPower(player);
+        if (glow <= 0 && !od && !full && !mark) return;
         if (!(Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player) instanceof PlayerRenderer renderer)) return;
 
         PlayerModel<AbstractClientPlayer> m = renderer.getModel();
@@ -56,6 +57,7 @@ public final class FirstPersonArms {
         int light = event.getPackedLight();
         float pulse = 0.8F + 0.2F * Mth.sin(player.tickCount * 0.15F);
 
+        if (mark && !full) EtherGearLayer.renderArm(pose, buf, light, arm);
         if (full) {
             VertexConsumer dark = buf.getBuffer(RenderType.entityTranslucentCull(ARMS));
             arm.render(pose, dark, light, OverlayTexture.NO_OVERLAY);
@@ -67,7 +69,7 @@ public final class FirstPersonArms {
             arm.render(pose, g, 0xF000F0, OverlayTexture.NO_OVERLAY, pulse, pulse, pulse, 1);
         }
         if (glow > 0) {
-            VertexConsumer g = buf.getBuffer(RenderType.eyes(GlowLimbLayer.TEXTURE));
+            VertexConsumer g = buf.getBuffer(RenderType.eyes(GlowLimbLayer.texture(player)));
             float k = glow * pulse;
             arm.render(pose, g, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
             sleeve.render(pose, g, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);

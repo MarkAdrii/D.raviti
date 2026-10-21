@@ -66,6 +66,7 @@ public final class GravityEvents {
         boolean has = Gravity.has(p);
         if (p.tickCount % 10 == 0) updateAttributes(p, has);
         if (!has) return;
+        GravityMovement.tick(p);
         // Regenera éter (en Overdrive no: el Overdrive lo consume)
         if (!Gravity.overdrive(p) && p.tickCount % 2 == 0) {
             int e = Gravity.ether(p);
@@ -127,7 +128,7 @@ public final class GravityEvents {
                 return;
             }
         }
-        if (Gravity.active(p, "ingravidez")) { event.setCanceled(true); return; }
+        if (Gravity.active(p, "ingravidez") || Gravity.active(p, "vuelo_sonico")) { event.setCanceled(true); return; }
         float d = event.getDistance();
         if (p instanceof ServerPlayer sp && d > 3)
             Gravity.setKinetic(sp, Gravity.kinetic(sp) + (int) (d * passive("kinetic_per_block", 20)));

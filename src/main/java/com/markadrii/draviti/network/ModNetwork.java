@@ -7,7 +7,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 
 /** Canal de red cliente-servidor. */
 public final class ModNetwork {
-    private static final String VERSION = "1";
+    private static final String VERSION = "2";
 
     public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
             Draviti.id("main"), () -> VERSION, VERSION::equals, VERSION::equals);
@@ -28,5 +28,8 @@ public final class ModNetwork {
         CHANNEL.messageBuilder(FxPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(FxPacket::encode).decoder(FxPacket::decode)
                 .consumerMainThread(FxPacket::handle).add();
+        CHANNEL.messageBuilder(MovePacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(MovePacket::encode).decoder(MovePacket::decode)
+                .consumerMainThread(MovePacket::handle).add();
     }
 }

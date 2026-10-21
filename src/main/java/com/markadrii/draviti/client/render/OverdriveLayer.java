@@ -46,7 +46,11 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
         // Al transformarse aparece poco a poco
         String key = Gravity.POWER_ID + "/" + (full ? "overdrive_completo" : "overdrive");
-        float in = Mth.clamp((ClientVisuals.activeTicks(player, key) + partialTick) / 12F, 0, 1);
+        // El aspecto aparece de golpe al final de la transformación (cuando estalla)
+        int start = com.markadrii.draviti.gravity.GravityAbilities.TRANSFORM_TICKS - 3;
+        float in = Mth.clamp((ClientVisuals.activeTicks(player, key) - start + partialTick) / 5F, 0, 1);
+        if (in <= 0 && !full) return;
+        if (full && in <= 0) { key = Gravity.POWER_ID + "/overdrive"; full = false; in = 1; }
         float pulse = 0.8F + 0.2F * Mth.sin(age * 0.15F);
 
         if (!full) {
@@ -64,20 +68,22 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
             float mk = in * pulse;
             m.renderToBuffer(pose, marks, 0xF000F0, overlay, mk, mk, mk, 1);
         } else {
-            // Pelo blanco
+            // Pelo blanco: sobre la skin (la cabeza, un poco más grande para que no se mezcle con ella) y sobre el gorro
             VertexConsumer hair = buffer.getBuffer(RenderType.entityTranslucentCull(HAIR));
+            float hx = m.head.xScale, hy = m.head.yScale, hz = m.head.zScale;
+            m.head.xScale = hx * 1.02F; m.head.yScale = hy * 1.02F; m.head.zScale = hz * 1.02F;
             m.head.render(pose, hair, light, overlay, 1, 1, 1, in);
+            m.head.xScale = hx; m.head.yScale = hy; m.head.zScale = hz;
             m.hat.render(pose, hair, light, overlay, 1, 1, 1, in);
-            // Brazos oscurecidos con marcas moradas
+            // Brazos y piernas oscurecidos con marcas moradas
             VertexConsumer dark = buffer.getBuffer(RenderType.entityTranslucentCull(ARMS));
-            m.rightArm.render(pose, dark, light, overlay, 1, 1, 1, in);
-            m.leftArm.render(pose, dark, light, overlay, 1, 1, 1, in);
-            m.rightSleeve.render(pose, dark, light, overlay, 1, 1, 1, in);
-            m.leftSleeve.render(pose, dark, light, overlay, 1, 1, 1, in);
+            for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve,
+                    m.rightLeg, m.leftLeg, m.rightPants, m.leftPants})
+                part.render(pose, dark, light, overlay, 1, 1, 1, in);
             VertexConsumer glow = buffer.getBuffer(RenderType.eyes(ARMS_GLOW));
             float gk = in * pulse;
-            m.rightArm.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
-            m.leftArm.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
+            for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightLeg, m.leftLeg})
+                part.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
         }
 
         // Cuernos (siguen a la cabeza)

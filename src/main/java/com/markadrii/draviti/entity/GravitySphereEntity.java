@@ -33,6 +33,8 @@ public class GravitySphereEntity extends Projectile {
 
     private static final EntityDataAccessor<Integer> KIND = SynchedEntityData.defineId(GravitySphereEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> SIZE = SynchedEntityData.defineId(GravitySphereEntity.class, EntityDataSerializers.FLOAT);
+    /** Forma de quien la lanza: 0-1 turquesa, 2 morada (Overdrive completo). */
+    private static final EntityDataAccessor<Integer> TIER = SynchedEntityData.defineId(GravitySphereEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> HELD = SynchedEntityData.defineId(GravitySphereEntity.class, EntityDataSerializers.BOOLEAN);
 
     private float damage = 8;
@@ -51,6 +53,7 @@ public class GravitySphereEntity extends Projectile {
         e.entityData.set(KIND, kind);
         e.entityData.set(SIZE, size);
         e.entityData.set(HELD, true);
+        e.entityData.set(TIER, Gravity.tier(owner));
         e.setPos(e.anchor(owner));
         owner.level().addFreshEntity(e);
         return e;
@@ -61,9 +64,11 @@ public class GravitySphereEntity extends Projectile {
         entityData.define(KIND, CANNON);
         entityData.define(SIZE, 0.5F);
         entityData.define(HELD, false);
+        entityData.define(TIER, 0);
     }
 
     public int kind() { return entityData.get(KIND); }
+    public int tier() { return entityData.get(TIER); }
     public float size() { return entityData.get(SIZE); }
     public void setSize(float s) { entityData.set(SIZE, s); }
     public boolean held() { return entityData.get(HELD); }
@@ -214,6 +219,7 @@ public class GravitySphereEntity extends Projectile {
         tag.putFloat("Damage", damage);
         tag.putFloat("Radius", radius);
         tag.putFloat("Knockback", knockback);
+        tag.putInt("Tier", tier());
     }
 
     @Override
@@ -224,6 +230,7 @@ public class GravitySphereEntity extends Projectile {
         damage = tag.getFloat("Damage");
         radius = tag.getFloat("Radius");
         knockback = tag.getFloat("Knockback");
+        entityData.set(TIER, tag.getInt("Tier"));
         // Al cargar el mundo ya no hay nadie que la sujete
         entityData.set(HELD, false);
     }

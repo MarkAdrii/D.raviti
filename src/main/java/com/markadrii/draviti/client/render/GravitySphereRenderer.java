@@ -23,6 +23,9 @@ public class GravitySphereRenderer extends EntityRenderer<GravitySphereEntity> {
     private static final ResourceLocation CORE = Draviti.id("textures/entity/sphere_core.png");
     private static final ResourceLocation HALO = Draviti.id("textures/entity/sphere_halo.png");
     private static final ResourceLocation RING = Draviti.id("textures/entity/sphere_ring.png");
+    private static final ResourceLocation CORE_T = Draviti.id("textures/entity/sphere_core_teal.png");
+    private static final ResourceLocation HALO_T = Draviti.id("textures/entity/sphere_halo_teal.png");
+    private static final ResourceLocation RING_T = Draviti.id("textures/entity/sphere_ring_teal.png");
 
     public GravitySphereRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
@@ -38,13 +41,15 @@ public class GravitySphereRenderer extends EntityRenderer<GravitySphereEntity> {
         pose.mulPose(Axis.YP.rotationDegrees(180.0F));
 
         float pulse = 1 + 0.06F * Mth.sin(t * 0.5F);
+        boolean violet = e.tier() >= 2;
+        ResourceLocation halo = violet ? HALO : HALO_T, ring = violet ? RING : RING_T, core = violet ? CORE : CORE_T;
         // Halo exterior
-        quad(pose, buf.getBuffer(RenderType.eyes(HALO)), size * 2.6F * pulse, t * 2F, 0.9F, 0.8F, 1F);
+        quad(pose, buf.getBuffer(RenderType.eyes(halo)), size * 2.6F * pulse, t * 2F, 1F, 1F, 1F);
         // Anillo en espiral girando (dos capas en sentidos contrarios)
-        quad(pose, buf.getBuffer(RenderType.eyes(RING)), size * 2.0F, t * 9F, 1F, 1F, 1F);
-        quad(pose, buf.getBuffer(RenderType.eyes(RING)), size * 1.7F, -t * 6F, 0.7F, 0.6F, 1F);
-        // Núcleo negro
-        quad(pose, buf.getBuffer(RenderType.entityTranslucent(CORE)), size * 1.25F, 0, 1F, 1F, 1F);
+        quad(pose, buf.getBuffer(RenderType.eyes(ring)), size * 2.0F, t * 9F, 1F, 1F, 1F);
+        quad(pose, buf.getBuffer(RenderType.eyes(ring)), size * 1.7F, -t * 6F, 0.75F, 0.75F, 0.75F);
+        // Núcleo oscuro
+        quad(pose, buf.getBuffer(RenderType.entityTranslucent(core)), size * 1.25F, 0, 1F, 1F, 1F);
         pose.popPose();
         super.render(e, yaw, pt, pose, buf, light);
     }

@@ -38,18 +38,33 @@ import java.util.List;
  * y polvo/tinta de vanilla para lo oscuro, que en aditivo no se vería.
  */
 public final class GravityFx {
-    // Paleta (r, g, b de 0 a 1)
-    static final float[] PURPLE = {0.64F, 0.36F, 1.00F};
-    static final float[] DEEP = {0.32F, 0.06F, 0.62F};
-    static final float[] LIGHT = {0.90F, 0.80F, 1.00F};
+    // Paleta (r, g, b de 0 a 1). Cambia con la forma: turquesa pálido (normal y Overdrive, como el Ether Gear)
+    // o morado (Overdrive completo). "PURPLE" es el color principal de la paleta que toque.
+    static float[] PURPLE, DEEP, LIGHT, MAGENTA, CYAN;
     static final float[] WHITE = {1.00F, 1.00F, 1.00F};
-    static final float[] MAGENTA = {0.90F, 0.30F, 1.00F};
     static final float[] GOLD = {1.00F, 0.80F, 0.30F};
-    static final float[] CYAN = {0.70F, 0.85F, 1.00F};
+    private static DustParticleOptions DUST_VOID, DUST_DEEP, DUST_PURPLE;
 
-    private static final DustParticleOptions DUST_VOID = new DustParticleOptions(new Vector3f(0.05F, 0.0F, 0.09F), 2.2F);
-    private static final DustParticleOptions DUST_DEEP = new DustParticleOptions(new Vector3f(0.28F, 0.05F, 0.50F), 1.6F);
-    private static final DustParticleOptions DUST_PURPLE = new DustParticleOptions(new Vector3f(0.62F, 0.35F, 1.0F), 1.2F);
+    private static final float[][] TEAL = {{0.45F, 0.90F, 0.78F}, {0.08F, 0.40F, 0.38F}, {0.84F, 1.00F, 0.95F}, {0.55F, 1.00F, 0.85F}, {0.75F, 1.00F, 0.95F}};
+    private static final float[][] VIOLET = {{0.64F, 0.36F, 1.00F}, {0.32F, 0.06F, 0.62F}, {0.90F, 0.80F, 1.00F}, {0.90F, 0.30F, 1.00F}, {0.70F, 0.85F, 1.00F}};
+    private static final DustParticleOptions[] DUST_TEAL = {
+            new DustParticleOptions(new Vector3f(0.01F, 0.07F, 0.07F), 2.2F),
+            new DustParticleOptions(new Vector3f(0.06F, 0.36F, 0.33F), 1.6F),
+            new DustParticleOptions(new Vector3f(0.45F, 0.90F, 0.78F), 1.2F)};
+    private static final DustParticleOptions[] DUST_VIOLET = {
+            new DustParticleOptions(new Vector3f(0.05F, 0.0F, 0.09F), 2.2F),
+            new DustParticleOptions(new Vector3f(0.28F, 0.05F, 0.50F), 1.6F),
+            new DustParticleOptions(new Vector3f(0.62F, 0.35F, 1.0F), 1.2F)};
+
+    static { theme(false); }
+
+    /** Elige la paleta: morada para el Overdrive completo, turquesa para lo demás. */
+    static void theme(boolean violet) {
+        float[][] t = violet ? VIOLET : TEAL;
+        PURPLE = t[0]; DEEP = t[1]; LIGHT = t[2]; MAGENTA = t[3]; CYAN = t[4];
+        DustParticleOptions[] d = violet ? DUST_VIOLET : DUST_TEAL;
+        DUST_VOID = d[0]; DUST_DEEP = d[1]; DUST_PURPLE = d[2];
+    }
 
     /** Efectos que duran varios ticks (espiral, campo, objetivos pesados/ingrávidos, implosión). */
     private record Ongoing(int type, int entityId, Vec3 pos, float a, int duration, int[] age) {}
@@ -68,6 +83,8 @@ public final class GravityFx {
         if (level == null) return;
         Entity src = p.entityId() >= 0 ? level.getEntity(p.entityId()) : null;
         Vec3 pos = p.pos();
+        theme(p.tier() >= 2);
+        if (PhotonBridge.available() && p.type() > Fx.GLOW && photon(p, src, pos)) return;
         switch (p.type()) {
             case Fx.ANIM -> {
                 if (src instanceof AbstractClientPlayer pl && ClientVisuals.playerAnimator()) {
@@ -84,8 +101,21 @@ public final class GravityFx {
             }
             case Fx.GLOW -> {
                 int i = (int) p.a();
-                if (i >= 0 && i < Limb.values().length) ClientVisuals.glow(p.entityId(), Limb.values()[i], (int) p.b());
+                if (i >= 0 && i < Limb.values().length) {
+                    Limb limb = Limb.values()[i];
+                    ClientVisuals.glow(p.entityId(), limb, (int) p.b());
+                    if (PhotonBridge.available() && src != null) {
+                        int t = Math.max(6, (int) p.b());
+                        String v = p.tier() >= 2 ? "_p" : "";
+                        if (limb == Limb.RIGHT_ARM || limb == Limb.BOTH_ARMS) PhotonBridge.on(src, "limb_glow_r" + v, 1, true, t);
+                        if (limb == Limb.LEFT_ARM || limb == Limb.BOTH_ARMS) PhotonBridge.on(src, "limb_glow_l" + v, 1, true, t);
+                        if (limb == Limb.RIGHT_LEG) PhotonBridge.on(src, "limb_glow_leg" + v, 1, true, t);
+                    }
+                }
             }
+            case Fx.OVERDRIVE_CHARGE -> overdriveCharge(level, src != null ? src.position() : pos, p.a() > 0);
+            case Fx.SONIC_BOOM -> sonicBoom(level, pos, p.dir());
+            case Fx.DASH -> dash(level, pos, p.dir());
             case Fx.FIST_CHARGE -> fistCharge(level, pos, p.a());
             case Fx.FIST_WAVE -> fistWave(level, pos, p.dir(), p.a());
             case Fx.SHOCKWAVE -> shockwave(level, pos, p.a());
@@ -108,6 +138,81 @@ public final class GravityFx {
         }
     }
 
+    /** Mismos efectos hechos con Photon. true si lo ha lanzado. */
+    private static boolean photon(FxPacket p, Entity src, Vec3 pos) {
+        float a = p.a();
+        // Variante morada en el Overdrive completo; los efectos de tamaño fijo crecen con la forma
+        String v = p.tier() >= 2 ? "_p" : "";
+        float k = p.tier() >= 2 ? 1.5F : p.tier() == 1 ? 1.25F : 1F;
+        switch (p.type()) {
+            case Fx.FIST_CHARGE -> PhotonBridge.at("fist_charge" + v, pos, (0.6F + a * 0.5F) * k);
+            case Fx.FIST_WAVE -> PhotonBridge.at("fist_wave" + v, pos, p.dir(), Math.max(0.6F, a / 5F));
+            case Fx.SHOCKWAVE -> PhotonBridge.at("shockwave" + v, pos, Math.max(0.3F, a / 5F));
+            case Fx.SPIRAL -> PhotonBridge.at("spiral" + v, pos, a / 14F);
+            case Fx.CRUSH_COLUMN -> PhotonBridge.at("crush_column" + v, pos, Math.max(0.6F, a / 8F));
+            case Fx.BARRAGE_HIT -> PhotonBridge.at("barrage_hit" + v, pos, (a > 0 ? 1F : 0.6F) * k);
+            case Fx.SPIN_RING -> PhotonBridge.at("spin_ring" + v, pos, a / 4.5F);
+            case Fx.LAUNCH -> PhotonBridge.at((a > 0 ? "launch" : "trail") + v, pos, k);
+            case Fx.IMPACT -> {
+                PhotonBridge.at("impact" + v, pos, Math.max(0.4F, a / 5F));
+                if (p.b() == 1) PhotonBridge.at("impact_gold" + v, pos, Math.max(0.4F, a / 5F));
+            }
+            case Fx.FIELD -> { if (p.b() == 0) PhotonBridge.at("field" + v, pos, a / 10F); }
+            case Fx.DEFLECT -> PhotonBridge.at("deflect" + v, pos, (0.6F + a * 0.3F) * k);
+            case Fx.HEAVY -> PhotonBridge.on(src, "heavy" + v, Math.max(0.6F, a / 1.8F), false, (int) p.b());
+            case Fx.WEIGHTLESS -> PhotonBridge.on(src, "weightless" + v, Math.max(0.6F, a / 1.8F), false, (int) p.b());
+            case Fx.SPHERE_BURST -> {
+                PhotonBridge.at("sphere_burst" + v, pos, Math.max(0.4F, a / 3F));
+                if (p.b() > 0) PhotonBridge.at("shockwave" + v, pos, a / 4F);
+            }
+            case Fx.BLACK_SKY_BURST -> PhotonBridge.at("black_sky" + v, pos, a / 8F);
+            case Fx.OVERDRIVE -> PhotonBridge.on(src, (a > 0 ? "overdrive_burst_full" : "overdrive_burst") + v, 1, false, 0);
+            case Fx.OVERDRIVE_CHARGE -> PhotonBridge.on(src, (a > 0 ? "overdrive_charge_full" : "overdrive_charge") + v, 1, false, 0);
+            case Fx.OVERDRIVE_OFF -> PhotonBridge.on(src, "overdrive_off" + v, 1, false, 0);
+            case Fx.ABSORB -> PhotonBridge.on(src, "absorb" + v, 1, false, 0);
+            case Fx.SONIC_BOOM -> PhotonBridge.at("sonic_boom" + v, pos, p.dir(), k);
+            case Fx.DASH -> PhotonBridge.at("dash" + v, pos, k);
+            default -> { return false; }
+        }
+        return true;
+    }
+
+    /** Transformación (sin Photon): el éter se concentra en el cuerpo antes del estallido. */
+    private static void overdriveCharge(ClientLevel level, Vec3 pos, boolean full) {
+        float[] a = full ? PURPLE : LIGHT, b = full ? DEEP : CYAN;
+        for (int i = 0; i < 40; i++) {
+            Vec3 off = randomDir(level.random).scale(2.6);
+            WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
+                    .setScaleData(GenericParticleData.create(0.3F, 0.05F).build())
+                    .setTransparencyData(GenericParticleData.create(0.8F, 0F).build())
+                    .setColorData(color(a, b))
+                    .setLifetime(14)
+                    .setMotion(off.scale(-0.07))
+                    .enableNoClip()
+                    .spawn(level, pos.x + off.x, pos.y + 1 + off.y, pos.z + off.z);
+        }
+        ring(level, pos.add(0, 0.05, 0), LodestoneParticleRegistry.WISP_PARTICLE, a, b, 0.0, 30, 0.3F, 0.02, 1.6);
+    }
+
+    private static void sonicBoom(ClientLevel level, Vec3 pos, Vec3 dir) {
+        Vec3 d = dir.lengthSqr() < 1.0E-6 ? new Vec3(0, 0, 1) : dir.normalize();
+        level.addParticle(ParticleTypes.SONIC_BOOM, pos.x, pos.y, pos.z, 0, 0, 0);
+        level.addParticle(ParticleTypes.FLASH, pos.x, pos.y, pos.z, 0, 0, 0);
+        RandomSource r = level.random;
+        for (int i = 0; i < 40; i++) {
+            Vec3 v = d.scale(-0.2).add(randomDir(r).scale(0.35));
+            level.addParticle(ParticleTypes.CLOUD, pos.x, pos.y, pos.z, v.x, v.y, v.z);
+        }
+        burst(level, pos, LodestoneParticleRegistry.SPARK_PARTICLE, WHITE, CYAN, 0.35F, 10, 0.4, 0.4, 25);
+    }
+
+    private static void dash(ClientLevel level, Vec3 pos, Vec3 dir) {
+        Vec3 c = pos.add(0, 0.9, 0);
+        burst(level, c, LodestoneParticleRegistry.WISP_PARTICLE, LIGHT, PURPLE, 0.3F, 10, 0.08, 0.4, 18);
+        ring(level, c, LodestoneParticleRegistry.WISP_PARTICLE, CYAN, PURPLE, 1.0, 14, 0.2F, 0);
+        for (int i = 0; i < 8; i++) level.addParticle(ParticleTypes.CLOUD, c.x, c.y - 0.5, c.z, -dir.x * 0.2, 0.02, -dir.z * 0.2);
+    }
+
     /** Cada tick de cliente (lo llama GravityClient). */
     public static void tick(ClientLevel level) {
         Iterator<Ongoing> it = ONGOING.iterator();
@@ -127,10 +232,15 @@ public final class GravityFx {
 
         // Esferas de gravedad: chispas que giran a su alrededor y polvo oscuro
         for (Entity e : level.entitiesForRendering())
-            if (e instanceof GravitySphereEntity s) sphereTick(level, s);
+            if (e instanceof GravitySphereEntity s) {
+                if (PhotonBridge.available()) {
+                    float sc = s.kind() == GravitySphereEntity.BLACK_SKY ? 3F : s.kind() == GravitySphereEntity.METEOR ? 1.6F : 0.8F;
+                    PhotonBridge.aura(s, s.tier() >= 2 ? "sphere_orbit_p" : "sphere_orbit", true, sc, false);
+                } else { theme(s.tier() >= 2); sphereTick(level, s); }
+            }
     }
 
-    public static void clear() { ONGOING.clear(); }
+    public static void clear() { ONGOING.clear(); PhotonBridge.clear(); }
 
     // =====================================================================================
     // Efectos
@@ -506,8 +616,21 @@ public final class GravityFx {
     // =====================================================================================
 
     public static void ambient(ClientLevel level, net.minecraft.world.entity.player.Player p, boolean od, boolean full,
-                               boolean anti, boolean floating, float armGlowR, float armGlowL, float legGlow) {
+                               boolean anti, boolean floating, boolean sonic, float armGlowR, float armGlowL, float legGlow) {
+        theme(full);
         RandomSource r = level.random;
+        if (sonic) {
+            Vec3 at = p.position().add(0, 0.9, 0);
+            WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
+                    .setScaleData(GenericParticleData.create(0.6F, 0F).build())
+                    .setTransparencyData(GenericParticleData.create(0.8F, 0F).build())
+                    .setColorData(color(LIGHT, PURPLE))
+                    .setLifetime(10)
+                    .setRandomOffset(0.3)
+                    .enableNoClip()
+                    .spawn(level, at.x, at.y, at.z);
+            level.addParticle(ParticleTypes.CLOUD, at.x, at.y, at.z, 0, 0, 0);
+        }
         int t = p.tickCount;
         Vec3 c = p.position().add(0, p.getBbHeight() * 0.55, 0);
         if (od && t % 3 == 0) {

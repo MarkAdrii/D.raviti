@@ -49,6 +49,7 @@ public final class ClientModEvents {
         for (String skin : event.getSkins()) {
             LivingEntityRenderer<?, ?> renderer = event.getSkin(skin);
             if (renderer instanceof PlayerRenderer pr) {
+                pr.addLayer(new com.markadrii.draviti.client.render.EtherGearLayer(pr));
                 pr.addLayer(new OverdriveLayer(pr));
                 pr.addLayer(new GlowLimbLayer(pr));
             }

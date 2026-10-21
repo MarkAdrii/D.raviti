@@ -17,7 +17,13 @@ import net.minecraft.util.Mth;
 
 /** El brazo (o la pierna) brilla de energía morada antes de una técnica: Puño, Ráfaga, Patada... */
 public class GlowLimbLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+    /** Morado (Overdrive completo) y turquesa pálido (normal y Overdrive). */
     public static final ResourceLocation TEXTURE = Draviti.id("textures/entity/glow_limb.png");
+    public static final ResourceLocation TEXTURE_TEAL = Draviti.id("textures/entity/glow_limb_teal.png");
+
+    public static ResourceLocation texture(AbstractClientPlayer p) {
+        return com.markadrii.draviti.gravity.Gravity.fullOverdrive(p) ? TEXTURE : TEXTURE_TEAL;
+    }
 
     public GlowLimbLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> parent) {
         super(parent);
@@ -31,7 +37,7 @@ public class GlowLimbLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
         float leg = ClientVisuals.glow(player, Limb.RIGHT_LEG);
         if (r <= 0 && l <= 0 && leg <= 0) return;
         PlayerModel<AbstractClientPlayer> m = getParentModel();
-        VertexConsumer vc = buffer.getBuffer(RenderType.eyes(TEXTURE));
+        VertexConsumer vc = buffer.getBuffer(RenderType.eyes(texture(player)));
         float pulse = 0.75F + 0.25F * Mth.sin(age * 0.8F);
         if (r > 0) {
             float k = r * pulse;
