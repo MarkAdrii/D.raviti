@@ -96,7 +96,7 @@ public final class Gravity {
 
     public static void setEther(Player p, int v) {
         PowerData d = data(p);
-        if (d != null && power() != null) d.setEnergy(power(), ETHER, Mth.clamp(v, 0, ETHER_MAX));
+        if (d != null && power() != null) d.setEnergy(power(), ETHER, Mth.clamp(v, 0, etherMax(p)));
     }
 
     public static int kinetic(Player p) {
@@ -106,7 +106,18 @@ public final class Gravity {
 
     public static void setKinetic(Player p, int v) {
         PowerData d = data(p);
-        if (d != null && power() != null) d.setEnergy(power(), KINETIC, Mth.clamp(v, 0, KINETIC_MAX));
+        if (d != null && power() != null) d.setEnergy(power(), KINETIC, Mth.clamp(v, 0, kineticMax(p)));
+    }
+
+    /** Máximo de éter de este jugador (por defecto 1000; se cambia con /draviti eter_max). */
+    public static int etherMax(Player p) {
+        PowerData d = data(p);
+        return d == null || power() == null ? ETHER_MAX : d.maxEnergy(power(), ETHER, ETHER_MAX);
+    }
+
+    public static int kineticMax(Player p) {
+        PowerData d = data(p);
+        return d == null || power() == null ? KINETIC_MAX : d.maxEnergy(power(), KINETIC, KINETIC_MAX);
     }
 
     /** Gasta éter; si no hay suficiente avisa y devuelve false. */

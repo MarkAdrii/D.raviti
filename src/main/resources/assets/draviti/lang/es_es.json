@@ -38,5 +38,7 @@
   "command.draviti.energy": "Energía puesta a %s",
   "command.draviti.none": "%s no tiene ningún poder de D.raviti",
   "message.draviti.blocks_on": "Las técnicas rompen bloques",
-  "message.draviti.blocks_off": "Las técnicas ya no rompen bloques"
+  "message.draviti.blocks_off": "Las técnicas ya no rompen bloques",
+  "command.draviti.ether_max": "Máximo de éter puesto a %s",
+  "command.draviti.kinetic_max": "Máximo de energía cinética puesto a %s"
 }

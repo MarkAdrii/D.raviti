@@ -70,7 +70,7 @@ public final class GravityEvents {
         // Regenera éter (en Overdrive no: el Overdrive lo consume)
         if (!Gravity.overdrive(p) && p.tickCount % 2 == 0) {
             int e = Gravity.ether(p);
-            if (e < Gravity.ETHER_MAX) Gravity.setEther(p, e + (int) Math.round(passive("ether_regen_per_second", 60) / 10.0));
+            if (e < Gravity.etherMax(p)) Gravity.setEther(p, e + (int) Math.round(passive("ether_regen_per_second", 60) / 10.0));
         }
     }
 
@@ -111,7 +111,7 @@ public final class GravityEvents {
             if (gain > 0) {
                 int before = Gravity.kinetic(p);
                 Gravity.setKinetic(p, before + gain);
-                if (before < Gravity.KINETIC_MAX) Gravity.fx(p, Fx.ABSORB, p.position(), gain, 0);
+                if (before < Gravity.kineticMax(p)) Gravity.fx(p, Fx.ABSORB, p.position(), gain, 0);
             }
         }
     }
@@ -127,7 +127,7 @@ public final class GravityEvents {
             gain = passive("ether_per_boss_kill", 400);
         else gain = passive("ether_per_kill", 60);
         int before = Gravity.ether(p);
-        if (before >= Gravity.ETHER_MAX) return;
+        if (before >= Gravity.etherMax(p)) return;
         Gravity.setEther(p, before + (int) gain);
         Gravity.fx(p, Fx.ABSORB, dead.position(), (float) gain, 0);
     }

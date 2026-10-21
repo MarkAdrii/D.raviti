@@ -24,10 +24,13 @@ import java.util.Collection;
 /**
  * /draviti dar|quitar &lt;jugadores&gt; [poder] — da o quita un poder (por defecto el Dios de la Gravedad).
  * /draviti eter &lt;jugadores&gt; &lt;valor&gt; — pone la barra de éter (y /draviti cinetica igual).
+ * /draviti eter_max|cinetica_max &lt;jugadores&gt; &lt;valor&gt; — cambia el máximo de cada barra (por defecto 1000).
  * /draviti lista [jugador]
  */
 public final class DravitiCommand {
     private DravitiCommand() {}
+
+    private static final int MAX_CAP = 1_000_000;
 
     private static final SuggestionProvider<CommandSourceStack> POWERS = (ctx, b) ->
             SharedSuggestionProvider.suggestResource(Powers.all().stream().map(Power::id), b);
@@ -46,12 +49,20 @@ public final class DravitiCommand {
                                         .executes(c -> give(c, ResourceLocationArgument.getId(c, "poder"), false)))))
                 .then(Commands.literal("eter")
                         .then(Commands.argument("jugadores", EntityArgument.players())
-                                .then(Commands.argument("valor", IntegerArgumentType.integer(0, Gravity.ETHER_MAX))
+                                .then(Commands.argument("valor", IntegerArgumentType.integer(0, MAX_CAP))
                                         .executes(c -> energy(c, true)))))
                 .then(Commands.literal("cinetica")
                         .then(Commands.argument("jugadores", EntityArgument.players())
-                                .then(Commands.argument("valor", IntegerArgumentType.integer(0, Gravity.KINETIC_MAX))
+                                .then(Commands.argument("valor", IntegerArgumentType.integer(0, MAX_CAP))
                                         .executes(c -> energy(c, false)))))
+                .then(Commands.literal("eter_max")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .then(Commands.argument("valor", IntegerArgumentType.integer(1, MAX_CAP))
+                                        .executes(c -> cap(c, Gravity.ETHER)))))
+                .then(Commands.literal("cinetica_max")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .then(Commands.argument("valor", IntegerArgumentType.integer(1, MAX_CAP))
+                                        .executes(c -> cap(c, Gravity.KINETIC)))))
                 .then(Commands.literal("lista")
                         .executes(c -> list(c, c.getSource().getPlayerOrException()))
                         .then(Commands.argument("jugador", EntityArgument.player())
@@ -70,7 +81,7 @@ public final class DravitiCommand {
             boolean ok = add ? PowerManager.grant(p, id) : PowerManager.revoke(p, id);
             if (ok) {
                 n++;
-                if (add && id.equals(Gravity.POWER_ID)) { Gravity.setEther(p, Gravity.ETHER_MAX); PowerManager.sync(p); }
+                if (add && id.equals(Gravity.POWER_ID)) { Gravity.setEther(p, Gravity.etherMax(p)); PowerManager.sync(p); }
             }
         }
         int count = n;
@@ -86,6 +97,23 @@ public final class DravitiCommand {
             PowerManager.sync(p);
         }
         c.getSource().sendSuccess(() -> Component.translatable("command.draviti.energy", v), true);
+        return 1;
+    }
+
+    /** Cambia el máximo de una barra; si la energía actual se pasa, se baja al nuevo máximo. */
+    private static int cap(CommandContext<CommandSourceStack> c, String bar) throws CommandSyntaxException {
+        int v = IntegerArgumentType.getInteger(c, "valor");
+        Power power = Gravity.power();
+        for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores")) {
+            var d = PowerCapability.get(p).orElse(null);
+            if (d == null || power == null) continue;
+            d.setMaxEnergy(power, bar, v);
+            if (Gravity.ETHER.equals(bar)) Gravity.setEther(p, Math.min(Gravity.ether(p), v));
+            else Gravity.setKinetic(p, Math.min(Gravity.kinetic(p), v));
+            PowerManager.sync(p);
+        }
+        c.getSource().sendSuccess(() -> Component.translatable(Gravity.ETHER.equals(bar)
+                ? "command.draviti.ether_max" : "command.draviti.kinetic_max", v), true);
         return 1;
     }
 

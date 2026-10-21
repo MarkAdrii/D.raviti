@@ -23,6 +23,8 @@ public class PowerData {
     private final Map<String, AbilityState> states = new HashMap<>();
     /** Barras de energía: "poder/barra" -> valor. */
     private final Map<String, Integer> energy = new HashMap<>();
+    /** Máximo de cada barra para este jugador ("poder/barra" -> máximo); si no está, el del poder. */
+    private final Map<String, Integer> energyMax = new HashMap<>();
     /** Ha cambiado algo que el cliente tiene que ver (energía): se envía al final del tick. No se guarda. */
     public boolean dirty;
     /** Las técnicas rompen bloques (se cambia pulsando Shift tres veces seguidas). */
@@ -59,6 +61,8 @@ public class PowerData {
     }
 
     public int energy(Power power, String bar) { return energy.getOrDefault(power.id() + "/" + bar, 0); }
+    public int maxEnergy(Power power, String bar, int def) { return energyMax.getOrDefault(power.id() + "/" + bar, def); }
+    public void setMaxEnergy(Power power, String bar, int max) { energyMax.put(power.id() + "/" + bar, max); dirty = true; }
     public boolean hasEnergy(Power power, String bar) { return energy.containsKey(power.id() + "/" + bar); }
     public void setEnergy(Power power, String bar, int value) {
         Integer old = energy.put(power.id() + "/" + bar, value);
@@ -78,6 +82,8 @@ public class PowerData {
         other.states.forEach((k, v) -> states.put(k, v.copy()));
         energy.clear();
         energy.putAll(other.energy);
+        energyMax.clear();
+        energyMax.putAll(other.energyMax);
         breakBlocks = other.breakBlocks;
         showMark = other.showMark;
     }
@@ -102,6 +108,9 @@ public class PowerData {
         CompoundTag en = new CompoundTag();
         energy.forEach(en::putInt);
         tag.put("Energy", en);
+        CompoundTag mx = new CompoundTag();
+        energyMax.forEach(mx::putInt);
+        tag.put("EnergyMax", mx);
         tag.putBoolean("BreakBlocks", breakBlocks);
         tag.putBoolean("ShowMark", showMark);
         return tag;
@@ -129,6 +138,9 @@ public class PowerData {
         }
         CompoundTag en = tag.getCompound("Energy");
         for (String k : en.getAllKeys()) energy.put(k, en.getInt(k));
+        energyMax.clear();
+        CompoundTag mx = tag.getCompound("EnergyMax");
+        for (String k : mx.getAllKeys()) energyMax.put(k, mx.getInt(k));
         breakBlocks = !tag.contains("BreakBlocks") || tag.getBoolean("BreakBlocks");
         showMark = !tag.contains("ShowMark") || tag.getBoolean("ShowMark");
     }
@@ -148,6 +160,8 @@ public class PowerData {
         });
         buf.writeVarInt(energy.size());
         energy.forEach((k, v) -> { buf.writeUtf(k); buf.writeVarInt(v); });
+        buf.writeVarInt(energyMax.size());
+        energyMax.forEach((k, v) -> { buf.writeUtf(k); buf.writeVarInt(v); });
     }
 
     public static PowerData read(FriendlyByteBuf buf) {
@@ -167,6 +181,8 @@ public class PowerData {
         }
         int e = buf.readVarInt();
         for (int i = 0; i < e; i++) d.energy.put(buf.readUtf(), buf.readVarInt());
+        int mx = buf.readVarInt();
+        for (int i = 0; i < mx; i++) d.energyMax.put(buf.readUtf(), buf.readVarInt());
         return d;
     }
 }

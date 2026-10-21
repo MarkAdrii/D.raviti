@@ -25,8 +25,10 @@ puede jugar con quien no lo tenga.
 ```
 /draviti dar @s            da el Dios de la Gravedad (con el éter lleno)
 /draviti quitar @s         lo quita
-/draviti eter @s 1000      llena la barra de éter
+/draviti eter @s 1000      pone la barra de éter (hasta su máximo)
 /draviti cinetica @s 1000  llena la energía cinética (Impacto Gravitatorio)
+/draviti eter_max @s 5000  cambia el máximo de éter (por defecto 1000; también se puede bajar)
+/draviti cinetica_max @s 3000  cambia el máximo de energía cinética
 /draviti lista             poderes que tienes
 ```
 

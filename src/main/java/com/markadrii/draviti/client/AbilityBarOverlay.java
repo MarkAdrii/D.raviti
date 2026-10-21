@@ -212,7 +212,8 @@ public class AbilityBarOverlay implements IGuiOverlay {
         int x = 1;
         for (Power.EnergyBar bar : power.energyBars()) {
             g.blit(texture, x, 0, 153, 0, 9, 104);
-            int h = (int) (data.energy(power, bar.name()) / (float) Math.max(1, bar.max()) * 98.0F);
+            int max = data.maxEnergy(power, bar.name(), bar.max());
+            int h = (int) Math.min(98, data.energy(power, bar.name()) / (float) Math.max(1, max) * 98.0F);
             // Relleno dibujado sin textura: se ve aunque la textura de la barra no tenga la zona de energía
             g.fill(x + 2, 3, x + 6, 101, 0xA0000000);
             g.fill(x + 2, 101 - h, x + 6, 101, 0xFF000000 | bar.color());

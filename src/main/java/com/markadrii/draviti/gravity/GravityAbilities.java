@@ -428,7 +428,8 @@ public final class GravityAbilities {
             }
             if (!Gravity.spend(p, cost(a))) return false;
             Gravity.setKinetic(p, 0);
-            float ratio = k / (float) Gravity.KINETIC_MAX;
+            // 1000 de energía = tamaño normal máximo; con más capacidad puede pasar de ahí (hasta x4)
+            float ratio = Math.min(4F, k / (float) Gravity.KINETIC_MAX);
             Gravity.glow(p, Limb.RIGHT_ARM, 30);
             Gravity.fx(p, Fx.FIST_CHARGE, Gravity.hand(p), 1.2F, 10);
             if (!p.onGround()) {
@@ -611,7 +612,7 @@ public final class GravityAbilities {
      */
     public static final AbilityBehavior BLACK_SKY = new AbilityBehavior() {
         @Override
-        public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.spend(p, cost(a)); }
+        public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.spend(p, Math.min(cost(a), Gravity.etherMax(p))); }
 
         @Override
         public void onActivate(ServerPlayer p, Ability a) {
