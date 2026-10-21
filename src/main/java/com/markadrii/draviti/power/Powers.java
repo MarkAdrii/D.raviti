@@ -104,10 +104,10 @@ public final class Powers {
                         .stat("ether_cost", 1000).stat("damage", 70).stat("radius", 8).stat("max_size", 5).stat("speed", 0.9).stat("range", 48)
                         .behavior(GravityAbilities.BLACK_SKY))
                 .add(Ability.builder("overdrive", TOGGLE).index(16).cooldown(300).color(BarColor.WHITE).icon(icon("overdrive"))
-                        .stat("min_ether", 150).stat("ether_per_second", 20)
+                        .stat("min_ether", 150).stat("ether_per_second", 10)
                         .behavior(GravityAbilities.OVERDRIVE))
                 .add(Ability.builder("overdrive_completo", TOGGLE).index(17).cooldown(600).color(BarColor.BLACK).icon(icon("overdrive_completo"))
-                        .requires("overdrive").stat("min_ether", 300).stat("ether_per_second", 20)
+                        .requires("overdrive").stat("min_ether", 300).stat("ether_per_second", 10)
                         .stat("pull_radius", 9).stat("pull_strength", 0.16)
                         .behavior(GravityAbilities.FULL_OVERDRIVE))
 
@@ -115,7 +115,8 @@ public final class Powers {
                 .add(Ability.builder("pasivas", ACTION).hidden().key(KeyType.KEY_BIND)
                         .stat("ether_regen_per_second", 60).stat("damage_reduction", 0.2).stat("punch_knockback", 0.8)
                         .stat("kinetic_per_damage", 25).stat("kinetic_per_block", 20).stat("safe_fall_blocks", 8)
-                        .stat("jump_bonus", 0.18))
+                        .stat("jump_bonus", 0.18)
+                        .stat("ether_per_kill", 60).stat("ether_per_boss_kill", 400).stat("ether_per_player_kill", 200))
                 .register();
     }
 

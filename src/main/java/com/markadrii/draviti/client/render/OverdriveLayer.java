@@ -47,7 +47,7 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         // Al transformarse aparece poco a poco
         String key = Gravity.POWER_ID + "/" + (full ? "overdrive_completo" : "overdrive");
         // El aspecto aparece de golpe al final de la transformación (cuando estalla)
-        int start = com.markadrii.draviti.gravity.GravityAbilities.TRANSFORM_TICKS - 3;
+        int start = com.markadrii.draviti.gravity.GravityAbilities.transformTicks(full) - 3;
         float in = Mth.clamp((ClientVisuals.activeTicks(player, key) - start + partialTick) / 5F, 0, 1);
         if (in <= 0 && !full) return;
         if (full && in <= 0) { key = Gravity.POWER_ID + "/overdrive"; full = false; in = 1; }

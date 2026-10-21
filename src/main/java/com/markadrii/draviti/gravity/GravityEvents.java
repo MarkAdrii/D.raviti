@@ -116,6 +116,22 @@ public final class GravityEvents {
         }
     }
 
+    /** Matar recupera éter (más con jefes y jugadores). */
+    @SubscribeEvent
+    public static void kill(net.minecraftforge.event.entity.living.LivingDeathEvent event) {
+        if (!(event.getSource().getEntity() instanceof ServerPlayer p) || !Gravity.has(p) || event.getEntity() == p) return;
+        LivingEntity dead = event.getEntity();
+        double gain;
+        if (dead instanceof Player) gain = passive("ether_per_player_kill", 200);
+        else if (dead.getType().is(net.minecraftforge.common.Tags.EntityTypes.BOSSES) || dead.getMaxHealth() >= 150)
+            gain = passive("ether_per_boss_kill", 400);
+        else gain = passive("ether_per_kill", 60);
+        int before = Gravity.ether(p);
+        if (before >= Gravity.ETHER_MAX) return;
+        Gravity.setEther(p, before + (int) gain);
+        Gravity.fx(p, Fx.ABSORB, dead.position(), (float) gain, 0);
+    }
+
     @SubscribeEvent
     public static void fall(LivingFallEvent event) {
         if (!(event.getEntity() instanceof Player p) || !Gravity.has(p)) return;

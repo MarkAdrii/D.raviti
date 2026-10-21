@@ -37,7 +37,7 @@ Es la misma barra y el mismo sistema que **Cursed Crown: Powers**: abajo a la de
 Al lado salen dos barras: **éter** (morado), que gastan las técnicas y se recarga solo, y **energía cinética**
 (dorada), que se llena al recibir golpes y caídas.
 
-Posición de la barra: `config/draviti-client.toml` → `bar_position`. Ahí también se puede quitar el temblor de pantalla.
+Posición de la barra: `config/draviti-client.toml` → `bar_corner`. Ahí también se puede quitar el temblor de pantalla.
 
 ### Junto a Cursed Crown: Powers
 
@@ -62,7 +62,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 2 | N | Cometa Gravitatorio (Jūsuisei) | Salto enorme y caída con los pies cargados de gravedad |
 | 2 | M | Placaje Gravitatorio | Vuelas hacia el objetivo y lo clavas en el suelo de una patada |
 | 2 | , | Impacto Gravitatorio | Convierte la energía cinética absorbida en un puñetazo hacia abajo (más energía, más grande) |
-| 3 | V | Campo Gravitatorio (Jūryokuba) | 10 s: los que entran quedan aplastados y los ataques caen al suelo |
+| 3 | V | Campo Gravitatorio (Jūryokuba) | 10 s: una esfera semitransparente cubre la zona; los de dentro quedan aplastados y los ataques caen al suelo |
 | 3 | B | Antigravedad (Hanjūryoku) | Desvía flechas y proyectiles; lo que tocas o te toca sale despedido |
 | 3 | N | Peso Infernal | Aumenta el peso de todos los de alrededor sin tocarlos (no pueden saltar ni volar) |
 | 3 | M | Ingravidez Ajena | El objetivo pierde su peso y flota sin control |
@@ -79,8 +79,8 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | Overdrive | Turquesa pálido | x1,6 | x1,3 |
 | Overdrive Completo | Morado | x2,4 | x1,7 |
 
-Al transformarte te encoges concentrando el éter (no te puedes mover un momento), la tierra tiembla y al final estallas
-con el nuevo aspecto. En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
+Al transformarte (más largo en el Overdrive Completo) te encoges concentrando el éter (no te puedes mover un momento), la tierra tiembla y al final estallas
+con el nuevo aspecto y un aura de llamas al estilo Dragon Ball (con Photon). En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
 
 Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho (líneas turquesa como las de Shiki).
 
@@ -91,7 +91,7 @@ Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho 
 - **Ingravidez + A, S o D dos veces:** dash hacia la izquierda, atrás o la derecha.
 - **Shift tres veces seguidas:** las técnicas rompen o dejan de romper bloques (se guarda para cada jugador).
 
-**Pasivas:** fuerza inmensa (los golpes normales empujan), aguante (menos daño), salta más alto ajustando su peso y
+**Pasivas:** matar recupera éter (60 por criatura, 200 por jugador, 400 por jefe), fuerza inmensa (los golpes normales empujan), aguante (menos daño), salta más alto ajustando su peso y
 aguanta caídas, absorbe la energía cinética de los golpes y caídas.
 
 Las técnicas rompen bloques (cráteres) pero nunca cofres ni bloques con inventario, ni en zonas protegidas

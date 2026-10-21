@@ -84,6 +84,9 @@ public final class GravityFx {
         Entity src = p.entityId() >= 0 ? level.getEntity(p.entityId()) : null;
         Vec3 pos = p.pos();
         theme(p.tier() >= 2);
+        // Campo Gravitatorio: la esfera la dibuja FieldDomes (con o sin Photon)
+        if (p.type() == Fx.FIELD)
+            com.markadrii.draviti.client.render.FieldDomes.update(p.entityId(), pos, p.a(), (int) p.b(), p.tier() >= 2);
         if (PhotonBridge.available() && p.type() > Fx.GLOW && photon(p, src, pos)) return;
         switch (p.type()) {
             case Fx.ANIM -> {
@@ -125,7 +128,7 @@ public final class GravityFx {
             case Fx.SPIN_RING -> spinRing(level, pos, p.a());
             case Fx.LAUNCH -> launch(level, pos, p.a() > 0);
             case Fx.IMPACT -> impact(level, pos, p.a(), (int) p.b());
-            case Fx.FIELD -> field(level, pos, p.a(), p.b() > 0);
+            case Fx.FIELD -> { if (p.b() < 2) field(level, pos, p.a(), p.b() > 0); }
             case Fx.DEFLECT -> deflect(level, pos, p.a());
             case Fx.HEAVY -> ONGOING.add(new Ongoing(Fx.HEAVY, p.entityId(), pos, p.a(), Math.min(200, (int) p.b()), new int[1]));
             case Fx.WEIGHTLESS -> ONGOING.add(new Ongoing(Fx.WEIGHTLESS, p.entityId(), pos, p.a(), Math.min(200, (int) p.b()), new int[1]));
@@ -451,28 +454,9 @@ public final class GravityFx {
     }
 
     /** Campo Gravitatorio: cúpula y líneas que caen; refresh = solo las líneas. */
+    /** Campo Gravitatorio (sin Photon): solo el borde en el suelo; la esfera la dibuja FieldDomes. */
     private static void field(ClientLevel level, Vec3 c, float radius, boolean refresh) {
-        RandomSource r = level.random;
-        if (!refresh) {
-            for (int i = 0; i < 90; i++) {
-                double a = r.nextDouble() * Math.PI * 2, el = r.nextDouble() * Math.PI / 2;
-                double x = Math.cos(a) * Math.cos(el) * radius, y = Math.sin(el) * radius * 0.6, z = Math.sin(a) * Math.cos(el) * radius;
-                WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
-                        .setScaleData(GenericParticleData.create(0.45F, 0.1F).build())
-                        .setTransparencyData(GenericParticleData.create(0.6F, 0F).build())
-                        .setColorData(color(PURPLE, DEEP))
-                        .setLifetime(30)
-                        .enableNoClip()
-                        .spawn(level, c.x + x, c.y + y, c.z + z);
-            }
-        }
-        // borde del campo en el suelo
         ring(level, c.add(0, 0.1, 0), LodestoneParticleRegistry.WISP_PARTICLE, PURPLE, DEEP, 0.0, (int) (radius * 5), 0.35F, 0, radius);
-        for (int i = 0; i < radius * 3; i++) {
-            double a = r.nextDouble() * Math.PI * 2, d = Math.sqrt(r.nextDouble()) * radius;
-            level.addParticle(DUST_PURPLE, c.x + Math.cos(a) * d, c.y + 3 + r.nextDouble() * 2, c.z + Math.sin(a) * d, 0, -0.9, 0);
-            if (i % 3 == 0) level.addParticle(ParticleTypes.REVERSE_PORTAL, c.x + Math.cos(a) * d, c.y + 0.2, c.z + Math.sin(a) * d, 0, -0.05, 0);
-        }
     }
 
     private static void deflect(ClientLevel level, Vec3 pos, float size) {
@@ -645,29 +629,30 @@ public final class GravityFx {
                     .enableNoClip()
                     .spawn(level, p.getX() + o.x, p.getY() + o.y, p.getZ() + o.z);
         }
-        if (full) {
-            // Agujero negro: remolino oscuro que se traga lo de alrededor
-            for (int i = 0; i < 3; i++) {
-                double a = r.nextDouble() * Math.PI * 2, rad = 3 + r.nextDouble() * 4;
-                Vec3 pt = c.add(Math.cos(a) * rad, (r.nextDouble() - 0.4) * 2, Math.sin(a) * rad);
-                Vec3 in = c.subtract(pt).normalize();
-                Vec3 tan = new Vec3(-in.z, 0, in.x);
-                Vec3 m = in.scale(0.22).add(tan.scale(0.18));
-                level.addParticle(i == 0 ? DUST_VOID : ParticleTypes.REVERSE_PORTAL, pt.x, pt.y, pt.z, m.x, m.y, m.z);
-            }
-            if (t % 2 == 0) {
-                double a = r.nextDouble() * Math.PI * 2, rad = 2.5 + r.nextDouble() * 2;
-                Vec3 pt = c.add(Math.cos(a) * rad, (r.nextDouble() - 0.5), Math.sin(a) * rad);
-                Vec3 in = c.subtract(pt).normalize();
-                Vec3 tan = new Vec3(-in.z, 0, in.x);
+        if (od || full) {
+            // Aura de Dragon Ball: lenguas de llama que suben pegadas al cuerpo
+            float big = full ? 1.25F : 1F;
+            for (int i = 0; i < (full ? 4 : 3); i++) {
+                double a = r.nextDouble() * Math.PI * 2, rad = (0.3 + r.nextDouble() * 0.2) * big;
                 WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
-                        .setScaleData(GenericParticleData.create(0.3F, 0.05F).build())
+                        .setScaleData(GenericParticleData.create(0.35F * big, 0.12F).build())
                         .setTransparencyData(GenericParticleData.create(0.75F, 0F).build())
-                        .setColorData(color(PURPLE, DEEP))
-                        .setLifetime(14)
-                        .setMotion(in.scale(0.16).add(tan.scale(0.14)))
+                        .setColorData(color(LIGHT, PURPLE))
+                        .setLifetime(8 + r.nextInt(4))
+                        .setMotion(0, 0.18 + r.nextDouble() * 0.08, 0)
                         .enableNoClip()
-                        .spawn(level, pt.x, pt.y, pt.z);
+                        .spawn(level, p.getX() + Math.cos(a) * rad, p.getY() + r.nextDouble() * 0.5, p.getZ() + Math.sin(a) * rad);
+            }
+        }
+        if (full) {
+            // Agujero negro pegado al cuerpo
+            for (int i = 0; i < 2; i++) {
+                double a = r.nextDouble() * Math.PI * 2, rad = 1.0 + r.nextDouble() * 0.7;
+                Vec3 pt = c.add(Math.cos(a) * rad, (r.nextDouble() - 0.5) * 1.4, Math.sin(a) * rad);
+                Vec3 in = c.subtract(pt).normalize();
+                Vec3 tan = new Vec3(-in.z, 0, in.x);
+                Vec3 m = in.scale(0.08).add(tan.scale(0.14));
+                level.addParticle(i == 0 ? DUST_VOID : ParticleTypes.REVERSE_PORTAL, pt.x, pt.y, pt.z, m.x, m.y, m.z);
             }
         }
         if (anti && t % 4 == 0) {

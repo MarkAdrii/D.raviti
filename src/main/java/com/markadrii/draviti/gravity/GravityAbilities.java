@@ -503,7 +503,10 @@ public final class GravityAbilities {
         }
 
         @Override
-        public void onDeactivate(ServerPlayer p, Ability a) { FIELD_CENTER.remove(p.getUUID()); }
+        public void onDeactivate(ServerPlayer p, Ability a) {
+            Vec3 c = FIELD_CENTER.remove(p.getUUID());
+            if (c != null) Gravity.fx(p, Fx.FIELD, c, (float) (a.stat("radius") * sqrtMult(p)), 2);
+        }
     };
 
     /** Antigravedad (Hanjūryoku): todo lo que toca o entra en su campo sale despedido en otra dirección (también las balas). */
@@ -659,25 +662,30 @@ public final class GravityAbilities {
     // =====================================================================================
 
     /** Ticks que dura la carga de la transformación antes del estallido (el aspecto aparece al final). */
-    public static final int TRANSFORM_TICKS = 24;
+    public static final int TRANSFORM_TICKS = 24, TRANSFORM_TICKS_FULL = 50;
+
+    public static int transformTicks(boolean full) { return full ? TRANSFORM_TICKS_FULL : TRANSFORM_TICKS; }
 
     /**
      * Transformación: se encoge concentrando el éter (no se puede mover), la tierra tiembla cada vez más y al final
      * estalla con el nuevo aspecto, empujando todo lo de alrededor.
      */
     static void transform(ServerPlayer p, boolean full) {
+        int total = transformTicks(full);
         Gravity.anim(p, full ? "transform_full" : "transform");
-        Gravity.fx(p, Fx.OVERDRIVE_CHARGE, p.position(), full ? 1 : 0, 0);
-        Gravity.glow(p, Limb.BOTH_ARMS, TRANSFORM_TICKS);
-        p.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, TRANSFORM_TICKS, 6, false, false));
+        Gravity.glow(p, Limb.BOTH_ARMS, total);
+        p.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.MOVEMENT_SLOWDOWN, total, 6, false, false));
         Gravity.sound(p, p.position(), SoundEvents.WARDEN_HEARTBEAT, 2F, 0.6F);
         Gravity.sound(p, p.position(), SoundEvents.BEACON_POWER_SELECT, 1.5F, full ? 0.5F : 0.8F);
         Tasks.start(p, t -> {
-            if (t % 6 == 0 && t < TRANSFORM_TICKS) {
-                Gravity.shake(p, p.position(), 0.3F + t / (float) TRANSFORM_TICKS * (full ? 1.2F : 0.7F), 8);
-                Gravity.sound(p, p.position(), SoundEvents.WARDEN_HEARTBEAT, 1.5F, 0.6F + t * 0.02F);
+            // El éter se concentra (el efecto dura 12 ticks y se repite mientras carga)
+            if (t % 12 == 0 && t < total - 4) Gravity.fx(p, Fx.OVERDRIVE_CHARGE, p.position(), full ? 1 : 0, 0);
+            if (t % 6 == 0 && t < total) {
+                Gravity.shake(p, p.position(), 0.3F + t / (float) total * (full ? 1.4F : 0.7F), 8);
+                Gravity.sound(p, p.position(), SoundEvents.WARDEN_HEARTBEAT, 1.5F, 0.6F + t / (float) total * 0.6F);
+                if (full && t % 12 == 6) Gravity.fx(p, Fx.SHOCKWAVE, p.position(), 2 + t / 10F, 0);
             }
-            if (t < TRANSFORM_TICKS) return false;
+            if (t < total) return false;
             Gravity.fx(p, Fx.OVERDRIVE, p.position(), full ? 1 : 0, 0);
             Gravity.fx(p, Fx.SHOCKWAVE, p.position(), full ? 9 : 6, 0);
             Gravity.shake(p, p.position(), full ? 3F : 1.6F, full ? 34 : 20);

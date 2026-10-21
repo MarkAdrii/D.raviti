@@ -22,7 +22,7 @@ public final class ClientConfig {
         b.push("ability_bar");
         POSITION = b.comment("Dónde se dibuja la barra de habilidades: TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT o HIDDEN.",
                         "Si tienes Cursed Crown: Powers instalado se usa la posición de su barra (las dos barras son una).")
-                .defineEnum("bar_position", Position.BOTTOM_RIGHT);
+                .defineEnum("bar_corner", Position.BOTTOM_RIGHT);
         b.pop();
         b.push("effects");
         SCREEN_SHAKE = b.comment("La pantalla tiembla con los golpes fuertes.").define("screen_shake", true);
