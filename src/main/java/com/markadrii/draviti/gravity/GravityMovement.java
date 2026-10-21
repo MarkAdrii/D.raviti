@@ -39,6 +39,7 @@ public final class GravityMovement {
                 Gravity.sound(p, p.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 1F, d.showMark ? 1.4F : 0.8F);
                 PowerManager.sync(p);
             }
+            case MovePacket.TOGGLE_FLOAT -> PowerManager.onKey(p, Gravity.power().id(), "ingravidez", true);
             case MovePacket.SONIC_START -> {
                 if (a == null || !Gravity.active(p, "ingravidez") || GravityAbilities.SONIC.contains(p.getUUID())) return;
                 if (Gravity.ether(p) < a.stat("sonic_ether_per_second") / 2) return;

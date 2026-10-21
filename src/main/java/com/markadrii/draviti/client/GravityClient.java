@@ -38,6 +38,8 @@ public final class GravityClient {
     private static boolean shiftWasDown;
     private static int lastSwap = -100;
     private static boolean swapWasDown;
+    private static int lastCtrl = -100, lastJump = -100;
+    private static boolean ctrlWasDown, jumpWasDown;
     private static boolean sonic;
     private static int sonicTicks, dashCooldown;
 
@@ -62,6 +64,7 @@ public final class GravityClient {
         if (Gravity.has(me) && mc.screen == null) {
             tripleShift(mc);
             doubleSwap(mc);
+            ctrlJump(mc);
             movementTaps(mc, me);
         } else if (sonic) {
             stopSonic();
@@ -122,6 +125,23 @@ public final class GravityClient {
             }
         }
         swapWasDown = down;
+    }
+
+    /**
+     * Ctrl + salto a la vez: Ingravidez sí/no. Las dos teclas tienen que pulsarse casi juntas (3 ticks), así correr
+     * con Ctrl mantenido y saltar no la activa.
+     */
+    private static void ctrlJump(Minecraft mc) {
+        boolean ctrl = mc.options.keySprint.isDown(), jump = mc.options.keyJump.isDown();
+        if (ctrl && !ctrlWasDown) lastCtrl = ticks;
+        if (jump && !jumpWasDown) lastJump = ticks;
+        boolean fresh = (ctrl && !ctrlWasDown) || (jump && !jumpWasDown);
+        if (fresh && ctrl && jump && Math.abs(lastCtrl - lastJump) <= 3) {
+            ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.TOGGLE_FLOAT, 0, 0));
+            lastCtrl = lastJump = -100;
+        }
+        ctrlWasDown = ctrl;
+        jumpWasDown = jump;
     }
 
     private static void movementTaps(Minecraft mc, LocalPlayer p) {

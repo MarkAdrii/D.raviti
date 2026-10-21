@@ -45,7 +45,8 @@ public final class Powers {
                 .energyBar(Gravity.KINETIC, 0xF2C94C, Gravity.KINETIC_MAX)
 
                 // Lista 1: Satan Gravity y los golpes básicos
-                .add(Ability.builder("ingravidez", TOGGLE).index(18).cooldown(20).color(BarColor.LIGHT_BLUE).icon(icon("ingravidez"))
+                // Ingravidez: fuera de la barra, se activa con Ctrl + salto (GravityClient)
+                .add(Ability.builder("ingravidez", TOGGLE).hidden().cooldown(20).color(BarColor.LIGHT_BLUE).icon(icon("ingravidez"))
                         .stat("ether_cost", 20).stat("ether_per_second", 8)
                         .stat("sonic_speed", 2.2).stat("sonic_ether_per_second", 40).stat("sonic_damage", 8)
                         .stat("dash_speed", 1.7).stat("dash_ether_cost", 25)

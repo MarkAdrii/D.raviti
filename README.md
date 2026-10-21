@@ -71,7 +71,6 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 3 | , | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
 | 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
-| 4 | M | Ingravidez | Flotas: salto sube, Shift baja. Contra una pared puedes andar por ella. Sin daño de caída |
 | 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
 
 ## Formas y colores
@@ -89,6 +88,8 @@ Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho 
 
 ## Controles extra
 
+- **Ctrl + salto a la vez:** Ingravidez sí/no (no ocupa hueco en la barra; siempre disponible). Flotas: salto sube,
+  Shift baja; contra una pared puedes andar por ella; sin daño de caída. Gasta un poco de éter mientras flotas.
 - **Ingravidez + W dos veces en el aire:** vuelo sónico (vuelas muy rápido hacia donde miras mientras mantienes W;
   arrollas lo que pillas). Gasta éter.
 - **Ingravidez + A, S o D dos veces:** dash hacia la izquierda, atrás o la derecha.
