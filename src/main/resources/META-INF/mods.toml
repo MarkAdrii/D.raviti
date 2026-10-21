@@ -36,3 +36,11 @@ description='''${mod_description}'''
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+# Opcional: si está instalado, D.raviti usa sus teclas y comparte su barra de habilidades (no hace falta para jugar)
+[[dependencies.${mod_id}]]
+    modId="cursedpowers"
+    mandatory=false
+    versionRange="*"
+    ordering="NONE"
+    side="BOTH"
