@@ -54,7 +54,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 
 | Lista | Tecla | Técnica | Qué hace |
 |---|---|---|---|
-| 1 | V | Ingravidez | Flotas: salto sube, Shift baja. Contra una pared puedes andar por ella. Sin daño de caída |
+| 1 | V | Gravity Swap | Lo que miras (un bloque o una dirección) pasa a ser tu suelo: caes hacia ahí, la cámara gira y andas por paredes y techos. Otra vez mirando a la misma superficie o al suelo = gravedad normal |
 | 1 | B | Puño Gravitatorio (Jūken) | El brazo brilla y el puñetazo lanza a todos los de delante y revienta el suelo |
 | 1 | N | Cañón Gravitatorio (Jūdan) | Forma una esfera de gravedad en el puño y la lanza; su peso empuja al objetivo |
 | 1 | M | Onda Gravitatoria (Jūryokuha) | Palma en el suelo: una espiral atrae hacia ti a todos (y los objetos) |
@@ -71,7 +71,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 3 | , | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
 | 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
-| 4 | M | Gravity Swap | Lo que miras (un bloque o una dirección) pasa a ser tu suelo: caes hacia ahí, la cámara gira y andas por paredes y techos. Otra vez mirando a la misma superficie o al suelo = gravedad normal |
+| 4 | M | Ingravidez | Flotas: salto sube, Shift baja. Contra una pared puedes andar por ella. Sin daño de caída |
 | 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
 
 ## Formas y colores
