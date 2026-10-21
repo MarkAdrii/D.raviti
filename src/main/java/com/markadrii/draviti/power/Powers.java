@@ -111,6 +111,11 @@ public final class Powers {
                         .stat("pull_radius", 9).stat("pull_strength", 0.16)
                         .behavior(GravityAbilities.FULL_OVERDRIVE))
 
+                // Gravity Swap: lo que miras pasa a ser el suelo
+                .add(Ability.builder("gravity_swap", ACTION).index(18).cooldown(10).color(BarColor.CYAN).icon(icon("gravity_swap"))
+                        .stat("ether_cost", 40).stat("ether_per_second", 5).stat("range", 48)
+                        .behavior(com.markadrii.draviti.gravity.GravitySwap.BEHAVIOR))
+
                 // Pasivas (sin tecla): solo guardan los valores ajustables
                 .add(Ability.builder("pasivas", ACTION).hidden().key(KeyType.KEY_BIND)
                         .stat("ether_regen_per_second", 60).stat("damage_reduction", 0.2).stat("punch_knockback", 0.8)

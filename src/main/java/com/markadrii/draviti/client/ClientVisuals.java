@@ -43,6 +43,14 @@ public final class ClientVisuals {
         return s != null && s.contains(key);
     }
 
+    /** Primera habilidad activa que empieza por prefix (p. ej. "draviti:gravity/swap_"), sin el prefijo; null si no hay. */
+    public static String suffix(Entity e, String prefix) {
+        Set<String> s = ACTIVE.get(e.getId());
+        if (s == null) return null;
+        for (String k : s) if (k.startsWith(prefix)) return k.substring(prefix.length());
+        return null;
+    }
+
     /** Ticks que lleva activa (0 si no lo está). */
     public static int activeTicks(Entity e, String key) {
         Map<String, Integer> st = STARTED.get(e.getId());

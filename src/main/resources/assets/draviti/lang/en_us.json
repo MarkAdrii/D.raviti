@@ -40,5 +40,6 @@
   "message.draviti.blocks_on": "Techniques break blocks",
   "message.draviti.blocks_off": "Techniques no longer break blocks",
   "command.draviti.ether_max": "Max Ether set to %s",
-  "command.draviti.kinetic_max": "Max kinetic energy set to %s"
+  "command.draviti.kinetic_max": "Max kinetic energy set to %s",
+  "ability.draviti.gravity.gravity_swap": "Gravity Swap"
 }

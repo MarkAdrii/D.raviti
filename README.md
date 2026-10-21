@@ -71,6 +71,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 3 | , | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
 | 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
+| 4 | M | Gravity Swap | Lo que miras (un bloque o una dirección) pasa a ser tu suelo: caes hacia ahí, la cámara gira y andas por paredes y techos. Otra vez mirando a la misma superficie o al suelo = gravedad normal |
 | 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
 
 ## Formas y colores

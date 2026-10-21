@@ -67,6 +67,7 @@ public final class GravityEvents {
         if (p.tickCount % 10 == 0) updateAttributes(p, has);
         if (!has) return;
         GravityMovement.tick(p);
+        GravitySwap.tick(p);
         // Regenera éter (en Overdrive no: el Overdrive lo consume)
         if (!Gravity.overdrive(p) && p.tickCount % 2 == 0) {
             int e = Gravity.ether(p);
