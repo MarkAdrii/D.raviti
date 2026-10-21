@@ -17,6 +17,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 /**
  * Gravity Swap en el cliente:
@@ -30,7 +31,11 @@ import org.joml.Quaternionf;
 public final class GravitySwapClient {
     private static final String KEY = Gravity.POWER_ID + "/swap_";
     private static boolean wasSwapped;
-    private static float roll, lastTarget;
+    /** Orientación del "suelo" actual (suavizada) y la mirada relativa a ese suelo (grados, como yaw/pitch). */
+    private static final Quaternionf frame = new Quaternionf();
+    private static Direction frameDir;
+    private static boolean steering;
+    private static float relYaw, relPitch;
     /** Desplazamiento de la cámara (suavizado entre frames). */
     private static Vec3 eye = Vec3.ZERO;
 
@@ -86,26 +91,90 @@ public final class GravitySwapClient {
         p.fallDistance = 0;
     }
 
-    // ------------------------------------------------------------------ cámara
+    // ------------------------------------------------------------------ cámara y ratón
+
+    /** Rotación que lleva el "abajo" normal (0,-1,0) a la gravedad de d (identidad si es normal). */
+    private static Quaternionf target(Direction d) {
+        if (d == null) return new Quaternionf();
+        Vec3 g = Vec3.atLowerCornerOf(d.getNormal());
+        return new Quaternionf().rotationTo(0, -1, 0, (float) g.x, (float) g.y, (float) g.z);
+    }
+
+    /** Dirección de mirada estilo Minecraft (yaw/pitch en grados). */
+    private static Vector3f look(float yaw, float pitch) {
+        double y = Math.toRadians(yaw), p = Math.toRadians(pitch);
+        return new Vector3f((float) (-Math.sin(y) * Math.cos(p)), (float) -Math.sin(p), (float) (Math.cos(y) * Math.cos(p)));
+    }
+
+    private static float yawOf(Vector3f f) { return (float) Math.toDegrees(Math.atan2(-f.x, f.z)); }
+    private static float pitchOf(Vector3f f) { return (float) Math.toDegrees(Math.asin(Mth.clamp(-f.y, -1F, 1F))); }
+
+    /**
+     * Cada frame: el marco (orientación del suelo) gira suave hacia el de la gravedad actual. La mirada en el mundo
+     * no salta: se recalcula la mirada relativa al marco nuevo. Al volver a la gravedad normal se suelta el control.
+     */
+    private static void updateFrame(LocalPlayer p) {
+        Direction d = dir(p);
+        if (!steering) {
+            if (d == null) return;
+            frame.identity();
+            steering = true;
+            relYaw = p.getYRot();
+            relPitch = p.getXRot();
+        }
+        frameDir = d;
+        Quaternionf t = target(d);
+        Vector3f world = new Quaternionf(frame).transform(look(relYaw, relPitch));
+        frame.slerp(t, 0.12F);
+        Vector3f local = new Quaternionf(frame).conjugate().transform(world);
+        relYaw = yawOf(local);
+        relPitch = Mth.clamp(pitchOf(local), -90F, 90F);
+        applyLook(p);
+        if (d == null && frame.equals(t, 0.002F)) { frame.identity(); steering = false; frameDir = null; }
+    }
+
+    /** La mirada del jugador en el mundo (para apuntar y moverse) sale de la mirada relativa. */
+    private static void applyLook(LocalPlayer p) {
+        Vector3f f = new Quaternionf(frame).transform(look(relYaw, relPitch));
+        float yaw = yawOf(f), pitch = pitchOf(f);
+        // yaw continuo (sin saltos de 360) para que el cuerpo no gire de golpe
+        float prev = p.getYRot();
+        yaw = prev + Mth.wrapDegrees(yaw - prev);
+        p.setYRot(yaw); p.setXRot(pitch);
+        p.yRotO = yaw; p.xRotO = pitch;
+    }
+
+    /**
+     * Lo llama el mixin de Entity.turn (movimiento del ratón). Con la gravedad girada el ratón mueve la mirada
+     * relativa al suelo nuevo: izquierda/derecha giran alrededor de tu "arriba" y arriba/abajo inclinan la cabeza.
+     */
+    public static boolean handleTurn(Entity e, double dx, double dy) {
+        Minecraft mc = Minecraft.getInstance();
+        if (e != mc.player || !steering) return false;
+        relYaw += (float) dx * 0.15F;
+        relPitch = Mth.clamp(relPitch + (float) dy * 0.15F, -90F, 90F);
+        applyLook(mc.player);
+        return true;
+    }
 
     @SubscribeEvent
     public static void camera(ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
-        Direction d = mc.player == null ? null : dir(mc.player);
-        float target = 0;
-        if (d != null && event.getCamera().getEntity() == mc.player) {
-            Vec3 g = Vec3.atLowerCornerOf(d.getNormal());
-            double yaw = Math.toRadians(event.getYaw()), pitch = Math.toRadians(event.getPitch());
-            Vec3 f = new Vec3(-Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
-            Vec3 r = new Vec3(-Math.cos(yaw), 0, -Math.sin(yaw));
-            Vec3 u = r.cross(f);
-            double gx = g.dot(r), gy = g.dot(u);
-            // La superficie a la que caes queda abajo en la pantalla
-            target = Math.abs(gx) + Math.abs(gy) < 0.15 ? lastTarget : (float) -Math.toDegrees(Math.atan2(gx, -gy));
-            lastTarget = target;
-        }
-        roll += Mth.wrapDegrees(target - roll) * 0.15F;
-        if (Math.abs(roll) > 0.01F) event.setRoll(event.getRoll() + roll);
+        if (mc.player == null) return;
+        updateFrame(mc.player);
+        if (!steering || event.getCamera().getEntity() != mc.player) return;
+        Vector3f f = new Quaternionf(frame).transform(look(relYaw, relPitch));
+        Vector3f u = new Quaternionf(frame).transform(look(relYaw, relPitch - 90F));
+        float yaw = yawOf(f), pitch = pitchOf(f);
+        // Ángulo de giro para que el "arriba" de la cámara sea el del suelo nuevo
+        double yr = Math.toRadians(yaw);
+        Vector3f r = new Vector3f((float) -Math.cos(yr), 0, (float) -Math.sin(yr));
+        Vector3f u0 = new Vector3f(r).cross(look(yaw, pitch));
+        float roll = (float) Math.toDegrees(Math.atan2(u.dot(r), u.dot(u0)));
+        float shake = event.getRoll();
+        event.setYaw(yaw);
+        event.setPitch(pitch);
+        event.setRoll(roll + shake);
     }
 
     /**

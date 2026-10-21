@@ -51,6 +51,7 @@ jobs:
           unzip -l "$jar" | grep -E "mixins.json|refmap.json"
           unzip -p "$jar" draviti.refmap.json | head -c 400
           unzip -p "$jar" draviti.refmap.json | grep -q "setup" || { echo "::error::El refmap no tiene el mixin de la cámara"; exit 1; }
+          unzip -p "$jar" draviti.refmap.json | grep -q "turn" || { echo "::error::El refmap no tiene el mixin del ratón"; exit 1; }
           unzip -p "$jar" META-INF/MANIFEST.MF | grep -q "MixinConfigs" || { echo "::error::Falta MixinConfigs en el manifiesto"; exit 1; }
           echo "::notice::Mixins OK en $jar"
 
