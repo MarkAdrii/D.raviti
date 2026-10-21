@@ -20,12 +20,14 @@ import net.minecraft.util.Mth;
  * Aspecto del Overdrive sobre la skin del jugador (se mantiene su skin y su armadura):
  * <ul>
  *   <li>Overdrive: el pelo y la piel se aclaran, marcas de éter claras por todo el cuerpo y cuernos de energía.</li>
- *   <li>Completo: pelo blanco, brazos oscurecidos con marcas moradas y cuernos negros con las mismas marcas.</li>
+ *   <li>Completo: brazos y piernas oscurecidos con marcas moradas, detalles en pecho y espalda (sin cubrirlo entero)
+ *       y cuernos negros con las mismas marcas.</li>
  * </ul>
  */
 public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
     private static final ResourceLocation MARKINGS = Draviti.id("textures/entity/od_markings.png");
-    private static final ResourceLocation HAIR = Draviti.id("textures/entity/od_hair.png");
+    private static final ResourceLocation TORSO = Draviti.id("textures/entity/od_torso.png");
+    private static final ResourceLocation TORSO_GLOW = Draviti.id("textures/entity/od_torso_glow.png");
     private static final ResourceLocation ARMS = Draviti.id("textures/entity/od_arms.png");
     private static final ResourceLocation ARMS_GLOW = Draviti.id("textures/entity/od_arms_glow.png");
     private static final ResourceLocation HORN_ENERGY = Draviti.id("textures/entity/horn_energy.png");
@@ -68,13 +70,6 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
             float mk = in * pulse * 0.55F;
             m.renderToBuffer(pose, marks, 0xF000F0, overlay, mk, mk, mk, 1);
         } else {
-            // Pelo blanco: sobre la skin (la cabeza, un poco más grande para que no se mezcle con ella) y sobre el gorro
-            VertexConsumer hair = buffer.getBuffer(RenderType.entityTranslucentCull(HAIR));
-            float hx = m.head.xScale, hy = m.head.yScale, hz = m.head.zScale;
-            m.head.xScale = hx * 1.02F; m.head.yScale = hy * 1.02F; m.head.zScale = hz * 1.02F;
-            m.head.render(pose, hair, light, overlay, 1, 1, 1, in);
-            m.head.xScale = hx; m.head.yScale = hy; m.head.zScale = hz;
-            m.hat.render(pose, hair, light, overlay, 1, 1, 1, in);
             // Brazos y piernas oscurecidos con marcas moradas
             VertexConsumer dark = buffer.getBuffer(RenderType.entityTranslucentCull(ARMS));
             for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve,
@@ -84,6 +79,12 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
             float gk = in * pulse * 0.7F;
             for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightLeg, m.leftLeg})
                 part.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
+            // Detalles en pecho y espalda (el centro del pecho queda al aire)
+            VertexConsumer torso = buffer.getBuffer(RenderType.entityTranslucentCull(TORSO));
+            m.body.render(pose, torso, light, overlay, 1, 1, 1, in);
+            m.jacket.render(pose, torso, light, overlay, 1, 1, 1, in);
+            VertexConsumer torsoGlow = buffer.getBuffer(RenderType.eyes(TORSO_GLOW));
+            m.body.render(pose, torsoGlow, 0xF000F0, overlay, gk, gk, gk, 1);
         }
 
         // Cuernos (siguen a la cabeza)

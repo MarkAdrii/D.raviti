@@ -69,7 +69,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 3 | , | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
 | 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,5 |
-| 4 | N | Overdrive Completo | (con Overdrive) Pelo blanco, brazos oscuros con marcas moradas, cuernos negros. Agujero negro que lo atrae todo; técnicas x2 |
+| 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2 |
 
 ## Formas y colores
 
@@ -80,7 +80,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | Overdrive Completo | Morado | x2,4 | x1,7 |
 
 Al transformarte (más largo en el Overdrive Completo) te encoges concentrando el éter (no te puedes mover un momento), la tierra tiembla y al final estallas
-con el nuevo aspecto y un un aura sutil que sale del cuerpo como agua y se evapora. En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
+con el nuevo aspecto y un un aura sutil que sale del cuerpo como agua y se evapora. En el Overdrive Completo se oscurecen brazos y piernas, con detalles por el pecho y la espalda (el centro del pecho queda al aire).
 
 Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho (líneas turquesa como las de Shiki).
 
