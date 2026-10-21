@@ -80,7 +80,7 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | Overdrive Completo | Morado | x2,4 | x1,7 |
 
 Al transformarte (más largo en el Overdrive Completo) te encoges concentrando el éter (no te puedes mover un momento), la tierra tiembla y al final estallas
-con el nuevo aspecto y un aura de llamas al estilo Dragon Ball (con Photon). En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
+con el nuevo aspecto y un un aura sutil que sale del cuerpo como agua y se evapora. En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
 
 Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho (líneas turquesa como las de Shiki).
 

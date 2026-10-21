@@ -59,13 +59,13 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
                     lp = m.leftPants.visible, rp = m.rightPants.visible;
             m.hat.visible = m.jacket.visible = m.leftSleeve.visible = m.rightSleeve.visible = m.leftPants.visible = m.rightPants.visible = false;
             VertexConsumer lighten = buffer.getBuffer(RenderType.eyes(player.getSkinTextureLocation()));
-            float k = 0.32F * in;
+            float k = 0.16F * in;
             m.renderToBuffer(pose, lighten, 0xF000F0, overlay, k, k, k * 1.05F, 1);
             m.hat.visible = hat; m.jacket.visible = jacket; m.leftSleeve.visible = ls; m.rightSleeve.visible = rs;
             m.leftPants.visible = lp; m.rightPants.visible = rp;
 
             VertexConsumer marks = buffer.getBuffer(RenderType.eyes(MARKINGS));
-            float mk = in * pulse;
+            float mk = in * pulse * 0.55F;
             m.renderToBuffer(pose, marks, 0xF000F0, overlay, mk, mk, mk, 1);
         } else {
             // Pelo blanco: sobre la skin (la cabeza, un poco más grande para que no se mezcle con ella) y sobre el gorro
@@ -81,7 +81,7 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
                     m.rightLeg, m.leftLeg, m.rightPants, m.leftPants})
                 part.render(pose, dark, light, overlay, 1, 1, 1, in);
             VertexConsumer glow = buffer.getBuffer(RenderType.eyes(ARMS_GLOW));
-            float gk = in * pulse;
+            float gk = in * pulse * 0.7F;
             for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightLeg, m.leftLeg})
                 part.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
         }

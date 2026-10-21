@@ -617,7 +617,7 @@ public final class GravityFx {
         }
         int t = p.tickCount;
         Vec3 c = p.position().add(0, p.getBbHeight() * 0.55, 0);
-        if (od && t % 3 == 0) {
+        if (false && od && t % 3 == 0) {
             // Éter claro que se desprende del cuerpo
             Vec3 o = new Vec3((r.nextDouble() - 0.5) * 0.7, r.nextDouble() * p.getBbHeight(), (r.nextDouble() - 0.5) * 0.7);
             WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
@@ -629,25 +629,22 @@ public final class GravityFx {
                     .enableNoClip()
                     .spawn(level, p.getX() + o.x, p.getY() + o.y, p.getZ() + o.z);
         }
-        if (od || full) {
-            // Aura de Dragon Ball: lenguas de llama que suben pegadas al cuerpo
-            float big = full ? 1.25F : 1F;
-            for (int i = 0; i < (full ? 4 : 3); i++) {
-                double a = r.nextDouble() * Math.PI * 2, rad = (0.3 + r.nextDouble() * 0.2) * big;
-                WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
-                        .setScaleData(GenericParticleData.create(0.35F * big, 0.12F).build())
-                        .setTransparencyData(GenericParticleData.create(0.75F, 0F).build())
-                        .setColorData(color(LIGHT, PURPLE))
-                        .setLifetime(8 + r.nextInt(4))
-                        .setMotion(0, 0.18 + r.nextDouble() * 0.08, 0)
-                        .enableNoClip()
-                        .spawn(level, p.getX() + Math.cos(a) * rad, p.getY() + r.nextDouble() * 0.5, p.getZ() + Math.sin(a) * rad);
-            }
+        if ((od || full) && t % 2 == 0) {
+            // Aura sutil: hilos que salen del cuerpo, suben fluyendo como agua y se evaporan
+            double a = r.nextDouble() * Math.PI * 2, rad = 0.32 * (full ? 1.15 : 1);
+            WorldParticleBuilder.create(LodestoneParticleRegistry.WISP_PARTICLE)
+                    .setScaleData(GenericParticleData.create(0.12F, 0.02F).build())
+                    .setTransparencyData(GenericParticleData.create(0.3F, 0F).build())
+                    .setColorData(color(LIGHT, PURPLE))
+                    .setLifetime(16 + r.nextInt(8))
+                    .setMotion(Math.cos(a) * 0.006, 0.06 + r.nextDouble() * 0.02, Math.sin(a) * 0.006)
+                    .enableNoClip()
+                    .spawn(level, p.getX() + Math.cos(a) * rad, p.getY() + 0.1 + r.nextDouble() * 1.6, p.getZ() + Math.sin(a) * rad);
         }
         if (full) {
             // Agujero negro pegado al cuerpo
-            for (int i = 0; i < 2; i++) {
-                double a = r.nextDouble() * Math.PI * 2, rad = 1.0 + r.nextDouble() * 0.7;
+            if (t % 2 == 0) for (int i = 0; i < 1; i++) {
+                double a = r.nextDouble() * Math.PI * 2, rad = 1.0 + r.nextDouble() * 0.5;
                 Vec3 pt = c.add(Math.cos(a) * rad, (r.nextDouble() - 0.5) * 1.4, Math.sin(a) * rad);
                 Vec3 in = c.subtract(pt).normalize();
                 Vec3 tan = new Vec3(-in.z, 0, in.x);
