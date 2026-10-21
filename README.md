@@ -89,6 +89,7 @@ Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho 
 - **Ingravidez + W dos veces en el aire:** vuelo sónico (vuelas muy rápido hacia donde miras mientras mantienes W;
   arrollas lo que pillas). Gasta éter.
 - **Ingravidez + A, S o D dos veces:** dash hacia la izquierda, atrás o la derecha.
+- **F dos veces** (la tecla de cambiar de mano): oculta o enseña la marca del Ether Gear del brazo (se guarda).
 - **Shift tres veces seguidas:** las técnicas rompen o dejan de romper bloques (se guarda para cada jugador).
 
 **Pasivas:** matar recupera éter (60 por criatura, 200 por jugador, 400 por jefe), fuerza inmensa (los golpes normales empujan), aguante (menos daño), salta más alto ajustando su peso y

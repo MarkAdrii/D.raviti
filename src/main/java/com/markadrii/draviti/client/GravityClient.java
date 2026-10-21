@@ -36,6 +36,8 @@ public final class GravityClient {
     private static final boolean[] wasDown = new boolean[4];
     private static final int[] shiftTaps = {-100, -100, -100};
     private static boolean shiftWasDown;
+    private static int lastSwap = -100;
+    private static boolean swapWasDown;
     private static boolean sonic;
     private static int sonicTicks, dashCooldown;
 
@@ -59,6 +61,7 @@ public final class GravityClient {
         LocalPlayer me = mc.player;
         if (Gravity.has(me) && mc.screen == null) {
             tripleShift(mc);
+            doubleSwap(mc);
             movementTaps(mc, me);
         } else if (sonic) {
             stopSonic();
@@ -105,6 +108,20 @@ public final class GravityClient {
             }
         }
         shiftWasDown = down;
+    }
+
+    /** F dos veces (la tecla de cambiar de mano): oculta o enseña la marca del Ether Gear. */
+    private static void doubleSwap(Minecraft mc) {
+        boolean down = mc.options.keySwapOffhand.isDown();
+        if (down && !swapWasDown) {
+            if (ticks - lastSwap <= DOUBLE_TAP + 2) {
+                ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.TOGGLE_MARK, 0, 0));
+                lastSwap = -100;
+            } else {
+                lastSwap = ticks;
+            }
+        }
+        swapWasDown = down;
     }
 
     private static void movementTaps(Minecraft mc, LocalPlayer p) {

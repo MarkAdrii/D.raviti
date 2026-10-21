@@ -32,6 +32,13 @@ public final class GravityMovement {
                 p.displayClientMessage(Component.translatable(d.breakBlocks ? "message.draviti.blocks_on" : "message.draviti.blocks_off"), true);
                 Gravity.sound(p, p.position(), SoundEvents.UI_BUTTON_CLICK.value(), 0.6F, d.breakBlocks ? 1.2F : 0.8F);
             }
+            case MovePacket.TOGGLE_MARK -> {
+                PowerData d = Gravity.data(p);
+                d.showMark = !d.showMark;
+                Gravity.fx(p, Fx.GLOW, p.position(), Limb.RIGHT_ARM.ordinal(), 10);
+                Gravity.sound(p, p.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 1F, d.showMark ? 1.4F : 0.8F);
+                PowerManager.sync(p);
+            }
             case MovePacket.SONIC_START -> {
                 if (a == null || !Gravity.active(p, "ingravidez") || GravityAbilities.SONIC.contains(p.getUUID())) return;
                 if (Gravity.ether(p) < a.stat("sonic_ether_per_second") / 2) return;

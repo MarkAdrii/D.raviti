@@ -27,9 +27,9 @@ public class EtherGearLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
         super(parent);
     }
 
-    /** El servidor manda "draviti:gravity/_has" a todos los que ven al jugador. */
+    /** El servidor manda "draviti:gravity/_mark" si tiene el poder y no la ha ocultado (F dos veces). */
     public static boolean hasPower(AbstractClientPlayer p) {
-        return ClientVisuals.active(p, Gravity.POWER_ID + "/_has") || Gravity.has(p);
+        return ClientVisuals.active(p, Gravity.POWER_ID + "/_mark");
     }
 
     @Override

@@ -27,6 +27,8 @@ public class PowerData {
     public boolean dirty;
     /** Las técnicas rompen bloques (se cambia pulsando Shift tres veces seguidas). */
     public boolean breakBlocks = true;
+    /** Se ve la marca del Ether Gear en el brazo (F dos veces para ocultarla). */
+    public boolean showMark = true;
 
     public static String key(Power power, Ability ability) {
         return power.id() + "/" + ability.id();
@@ -77,6 +79,7 @@ public class PowerData {
         energy.clear();
         energy.putAll(other.energy);
         breakBlocks = other.breakBlocks;
+        showMark = other.showMark;
     }
 
     // ---- NBT ----
@@ -100,6 +103,7 @@ public class PowerData {
         energy.forEach(en::putInt);
         tag.put("Energy", en);
         tag.putBoolean("BreakBlocks", breakBlocks);
+        tag.putBoolean("ShowMark", showMark);
         return tag;
     }
 
@@ -126,6 +130,7 @@ public class PowerData {
         CompoundTag en = tag.getCompound("Energy");
         for (String k : en.getAllKeys()) energy.put(k, en.getInt(k));
         breakBlocks = !tag.contains("BreakBlocks") || tag.getBoolean("BreakBlocks");
+        showMark = !tag.contains("ShowMark") || tag.getBoolean("ShowMark");
     }
 
     // ---- Red ----
