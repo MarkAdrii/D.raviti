@@ -66,6 +66,11 @@ repositories {
         name = "KosmX (Player Animator)"
         url = "https://maven.kosmx.dev/"
     }
+    maven {
+        name = "CurseMaven (Photon y LDLib, solo para probar)"
+        url = "https://cursemaven.com"
+        content { includeGroup "curse.maven" }
+    }
 }
 
 dependencies {
@@ -75,6 +80,13 @@ dependencies {
     implementation fg.deobf("team.lodestar.lodestone:lodestone:${lodestone_version}", { transitive = false })
     // Animaciones del jugador
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}")
+
+    // Photon (opcional): solo en runClient para ver sus efectos. No va dentro del .jar ni hace falta para jugar.
+    // Para probar sin Photon pon dev_photon=false en gradle.properties.
+    if (project.findProperty('dev_photon') == 'true') {
+        runtimeOnly fg.deobf("curse.maven:photon-871522:${photon_file}")
+        runtimeOnly fg.deobf("curse.maven:ldlib-626676:${ldlib_file}")
+    }
 }
 
 tasks.named('processResources', ProcessResources).configure {
