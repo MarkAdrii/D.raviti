@@ -213,7 +213,7 @@ public final class Gravity {
     public static void launchFrom(Entity e, Vec3 center, double strength, double up) {
         Vec3 d = e.position().subtract(center);
         d = new Vec3(d.x, 0, d.z);
-        if (d.lengthSqr() < 1.0E-4) d = new Vec3(e.getRandom().nextDouble() - 0.5, 0, e.getRandom().nextDouble() - 0.5);
+        if (d.lengthSqr() < 1.0E-4) d = new Vec3(e.level().random.nextDouble() - 0.5, 0, e.level().random.nextDouble() - 0.5);
         d = d.normalize().scale(strength * resist(e));
         setMotion(e, new Vec3(d.x, up * resist(e), d.z));
     }
