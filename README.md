@@ -16,6 +16,10 @@ Además de D.raviti, instala en la carpeta `mods`:
 
 En desarrollo (`runClient`) se descargan solos.
 
+**Opcional:** [Photon](https://www.curseforge.com/minecraft/mc-mods/photon) para Forge 1.20.1. Con Photon instalado los
+efectos son los de Photon (`assets/draviti/fx/`, 68 efectos); sin él, D.raviti usa sus efectos de Lodestone. Así se
+puede jugar con quien no lo tenga.
+
 ## Cómo se consigue el poder
 
 ```
@@ -28,7 +32,7 @@ En desarrollo (`runClient`) se descargan solos.
 
 ## Barra de habilidades y teclas
 
-Es la misma barra y el mismo sistema que **Cursed Crown: Powers**: arriba a la derecha, habilidades con
+Es la misma barra y el mismo sistema que **Cursed Crown: Powers**: abajo a la derecha, habilidades con
 **V, B, N, M y coma**, **X** cambia de lista (Shift + X hacia atrás). Con el chat abierto (T) se ven los nombres.
 Al lado salen dos barras: **éter** (morado), que gastan las técnicas y se recarga solo, y **energía cinética**
 (dorada), que se llena al recibir golpes y caídas.
@@ -66,6 +70,26 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,5 |
 | 4 | N | Overdrive Completo | (con Overdrive) Pelo blanco, brazos oscuros con marcas moradas, cuernos negros. Agujero negro que lo atrae todo; técnicas x2 |
+
+## Formas y colores
+
+| Forma | Color de los efectos | Daño | Tamaño (alcance, radios, cráteres) |
+|---|---|---|---|
+| Normal | Turquesa pálido (como el Ether Gear) | x1 | x1 |
+| Overdrive | Turquesa pálido | x1,6 | x1,3 |
+| Overdrive Completo | Morado | x2,4 | x1,7 |
+
+Al transformarte te encoges concentrando el éter (no te puedes mover un momento), la tierra tiembla y al final estallas
+con el nuevo aspecto. En el Overdrive Completo se oscurecen brazos y piernas y el pelo se vuelve blanco.
+
+Con el poder siempre llevas la **marca del Ether Gear** en el antebrazo derecho (líneas turquesa como las de Shiki).
+
+## Controles extra
+
+- **Ingravidez + W dos veces en el aire:** vuelo sónico (vuelas muy rápido hacia donde miras mientras mantienes W;
+  arrollas lo que pillas). Gasta éter.
+- **Ingravidez + A, S o D dos veces:** dash hacia la izquierda, atrás o la derecha.
+- **Shift tres veces seguidas:** las técnicas rompen o dejan de romper bloques (se guarda para cada jugador).
 
 **Pasivas:** fuerza inmensa (los golpes normales empujan), aguante (menos daño), salta más alto ajustando su peso y
 aguanta caídas, absorbe la energía cinética de los golpes y caídas.
