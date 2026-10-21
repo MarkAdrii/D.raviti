@@ -31,6 +31,8 @@ public final class GravitySwapClient {
     private static final String KEY = Gravity.POWER_ID + "/swap_";
     private static boolean wasSwapped;
     private static float roll, lastTarget;
+    /** Desplazamiento de la cámara (suavizado entre frames). */
+    private static Vec3 eye = Vec3.ZERO;
 
     private GravitySwapClient() {}
 
@@ -104,6 +106,27 @@ public final class GravitySwapClient {
         }
         roll += Mth.wrapDegrees(target - roll) * 0.15F;
         if (Math.abs(roll) > 0.01F) event.setRoll(event.getRoll() + roll);
+    }
+
+    /**
+     * Cuánto hay que mover la cámara para que los ojos queden donde toca con la gravedad girada (lo usa CameraMixin).
+     * Ojos normales: pies + 1.62 hacia arriba. Girados: centro del cuerpo dibujado + 0.72 en contra de la gravedad.
+     */
+    public static Vec3 eyeOffset(Entity entity, float partialTick) {
+        Minecraft mc = Minecraft.getInstance();
+        if (entity != mc.player) return null;
+        Direction d = dir(entity);
+        Vec3 target = Vec3.ZERO;
+        if (d != null) {
+            Vec3 g = Vec3.atLowerCornerOf(d.getNormal());
+            float half = entity.getBbHeight() / 2F, eyeH = entity.getEyeHeight();
+            double along = d.getAxis() == Direction.Axis.Y ? half : entity.getBbWidth() / 2F;
+            Vec3 swapped = new Vec3(0, half, 0).subtract(g.scale(eyeH - along));
+            target = swapped.subtract(0, eyeH, 0);
+        }
+        eye = eye.add(target.subtract(eye).scale(0.18));
+        if (eye.lengthSqr() < 1.0E-5 && target == Vec3.ZERO) { eye = Vec3.ZERO; return null; }
+        return eye;
     }
 
     // ------------------------------------------------------------------ modelo

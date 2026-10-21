@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.markadrii.draviti.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "draviti.refmap.json",
+  "client": [
+    "CameraMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
