@@ -73,6 +73,13 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 | 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
 | 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
 
+### Gravity Swap y Gravity Control
+
+El giro de la gravedad (hitbox, físicas, cámara, controles y modelo del jugador) es el núcleo de
+[Gravity Control](https://www.curseforge.com/minecraft/mc-mods/gravity-control) (Tfarcenim, a partir de Gravity Changer
+de Gaider10), copiado en `gravitycore/` bajo su licencia MIT (`GRAVITY_CHANGER_LICENSE.txt`). No hace falta instalarlo;
+si alguien lo tiene instalado, D.raviti desactiva su copia y usa el de Gravity Control para que no se giren las cosas dos veces.
+
 ## Formas y colores
 
 | Forma | Color de los efectos | Daño | Tamaño (alcance, radios, cráteres) |
