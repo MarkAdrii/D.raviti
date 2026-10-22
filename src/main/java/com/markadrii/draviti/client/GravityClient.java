@@ -219,9 +219,10 @@ public final class GravityClient {
                 double speed = Math.min(max, 0.9 + sonicTicks * 0.15);
                 sonicTicks++;
                 Vec3 look = p.getLookAngle();
-                Vec3 v = p.getDeltaMovement().scale(0.3).add(look.scale(speed * 0.7));
+                // En coordenadas del mundo (sirve también con la gravedad girada por Gravity Swap)
+                Vec3 v = com.markadrii.draviti.gravity.GravityBridge.worldVelocity(p).scale(0.3).add(look.scale(speed * 0.7));
                 if (v.length() > speed) v = v.normalize().scale(speed);
-                p.setDeltaMovement(v);
+                com.markadrii.draviti.gravity.GravityBridge.setWorldVelocity(p, v);
                 p.fallDistance = 0;
                 return;
             }

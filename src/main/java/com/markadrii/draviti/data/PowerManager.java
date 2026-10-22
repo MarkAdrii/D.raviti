@@ -36,8 +36,6 @@ public final class PowerManager {
         for (Power p : d.getPowers()) active.add(p.id() + "/_has");
         if (d.showMark && d.hasPower(com.markadrii.draviti.gravity.Gravity.POWER_ID))
             active.add(com.markadrii.draviti.gravity.Gravity.POWER_ID + "/_mark");
-        var swap = com.markadrii.draviti.gravity.GravitySwap.get(player);
-        if (swap != null) active.add(com.markadrii.draviti.gravity.Gravity.POWER_ID + "/swap_" + swap.getName());
         if (com.markadrii.draviti.gravity.GravityAbilities.SONIC.contains(player.getUUID()))
             active.add(com.markadrii.draviti.gravity.Gravity.POWER_ID + "/vuelo_sonico");
         return new VisualStatePacket(player.getId(), active);

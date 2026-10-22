@@ -23,9 +23,10 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Gravity Swap: el bloque (o la dirección) al que miras se convierte en tu centro de gravedad. Caes hacia él, la
- * cámara gira y puedes andar por paredes y techos. Pulsar otra vez mirando a la misma superficie (o al suelo)
- * devuelve la gravedad normal. El cliente mueve el cuerpo; aquí se decide la dirección y se gasta el éter.
+ * Gravity Swap: el bloque (o la dirección) al que miras se convierte en tu centro de gravedad. Caes hacia él y
+ * puedes andar por paredes y techos. Pulsar otra vez mirando a la misma superficie (o al suelo) devuelve la gravedad
+ * normal. El giro de hitbox, físicas, cámara, controles y modelo lo hace el núcleo de Gravity Control
+ * (paquete gravitycore); aquí se decide la dirección y se gasta el éter.
  */
 @Mod.EventBusSubscriber(modid = Draviti.MOD_ID)
 public final class GravitySwap {
@@ -48,10 +49,7 @@ public final class GravitySwap {
             }
             if (!Gravity.spend(p, a.stat("ether_cost"))) return false;
             SWAP.put(p.getUUID(), dir);
-            if (!p.isCreative() && !p.isSpectator()) {
-                p.getAbilities().mayfly = true;   // si no, el servidor lo echa por "volar"
-                p.onUpdateAbilities();
-            }
+            GravityBridge.set(p, dir);
             Gravity.fxOn(p, Fx.WEIGHTLESS, p, p.getBbHeight(), 20);
             Gravity.fx(p, Fx.DEFLECT, p.position().add(0, 1, 0), 2, 0);
             Gravity.sound(p, p.position(), SoundEvents.BEACON_POWER_SELECT, 1F, 0.6F);
@@ -73,11 +71,7 @@ public final class GravitySwap {
 
     public static void reset(ServerPlayer p, boolean effects) {
         if (SWAP.remove(p.getUUID()) == null) return;
-        if (!p.isCreative() && !p.isSpectator() && !Gravity.active(p, "ingravidez")) {
-            p.getAbilities().mayfly = false;
-            p.getAbilities().flying = false;
-            p.onUpdateAbilities();
-        }
+        GravityBridge.set(p, Direction.DOWN);
         GravityAbilities.safeFall(p, 80);
         if (effects) {
             Gravity.fx(p, Fx.DEFLECT, p.position().add(0, 1, 0), 1, 0);
@@ -116,7 +110,14 @@ public final class GravitySwap {
 
     @SubscribeEvent
     public static void logout(PlayerEvent.PlayerLoggedOutEvent event) {
-        SWAP.remove(event.getEntity().getUUID());
+        if (event.getEntity() instanceof ServerPlayer p) reset(p, false);
+    }
+
+    /** Al entrar se vuelve a la gravedad normal (la del núcleo se guarda con el jugador). */
+    @SubscribeEvent
+    public static void login(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() instanceof ServerPlayer p && !SWAP.containsKey(p.getUUID())
+                && GravityBridge.get(p) != Direction.DOWN) GravityBridge.set(p, Direction.DOWN);
     }
 
     @SubscribeEvent

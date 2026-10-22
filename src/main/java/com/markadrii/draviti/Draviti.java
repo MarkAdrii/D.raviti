@@ -25,6 +25,8 @@ public class Draviti {
 
     public Draviti() {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        // Núcleo de gravedad de Gravity Control (Gravity Swap)
+        com.markadrii.draviti.gravitycore.GravityCore.init(modBus);
 
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);

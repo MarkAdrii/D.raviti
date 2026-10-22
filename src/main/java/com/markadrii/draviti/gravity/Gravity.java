@@ -221,13 +221,14 @@ public final class Gravity {
     // ------------------------------------------------------------------ física
 
     /** Cambia la velocidad de una entidad y se la manda al cliente (los jugadores mueven su propio cuerpo). */
+    /** v en coordenadas del mundo (aunque el objetivo tenga la gravedad girada). */
     public static void setMotion(Entity e, Vec3 v) {
-        e.setDeltaMovement(v);
+        GravityBridge.setWorldVelocity(e, v);
         e.hasImpulse = true;
         e.hurtMarked = true;
     }
 
-    public static void push(Entity e, Vec3 v) { setMotion(e, e.getDeltaMovement().add(v)); }
+    public static void push(Entity e, Vec3 v) { setMotion(e, GravityBridge.worldVelocity(e).add(v)); }
 
     /** Empuja hacia fuera desde center con fuerza strength (y un poco hacia arriba). */
     public static void launchFrom(Entity e, Vec3 center, double strength, double up) {

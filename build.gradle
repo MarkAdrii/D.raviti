@@ -15,6 +15,9 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
+// MixinExtras va dentro del .jar (lo necesita el núcleo de gravedad de Gravity Control)
+jarJar.enable()
+
 minecraft {
     mappings channel: mapping_channel, version: mapping_version
     copyIdeResources = true
@@ -58,13 +61,14 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-// Mixins propios (cámara de Gravity Swap)
+// Mixins del núcleo de gravedad (copiado de Gravity Control) para Gravity Swap
 mixin {
     add sourceSets.main, "${mod_id}.refmap.json"
-    config "${mod_id}.mixins.json"
+    config "${mod_id}.gravity.mixins.json"
 }
 
 repositories {
+    mavenCentral()
     maven {
         name = "BlameJared (Lodestone)"
         url = "https://maven.blamejared.com/"
@@ -83,6 +87,10 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
+    implementation(jarJar("io.github.llamalad7:mixinextras-forge:0.4.1")) {
+        jarJar.ranged(it, "[0.4.1,)")
+    }
 
     // VFX y partículas
     implementation fg.deobf("team.lodestar.lodestone:lodestone:${lodestone_version}", { transitive = false })
@@ -118,8 +126,8 @@ tasks.named('processResources', ProcessResources).configure {
     }
 }
 
-tasks.named('jar', Jar).configure {
-    manifest {
+def applyModManifest(Jar t) {
+    t.manifest {
         attributes([
                 'Specification-Title'     : mod_id,
                 'Specification-Vendor'    : mod_authors,
@@ -128,10 +136,24 @@ tasks.named('jar', Jar).configure {
                 'Implementation-Version'  : project.jar.archiveVersion,
                 'Implementation-Vendor'   : mod_authors,
                 'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                'MixinConfigs'            : "${mod_id}.mixins.json"
+                'MixinConfigs'            : "${mod_id}.gravity.mixins.json"
         ])
     }
+}
+
+// El .jar para jugar es el de jarJar (lleva MixinExtras dentro); el normal queda como "-slim"
+tasks.named('jar', Jar).configure {
+    applyModManifest(it)
+    archiveClassifier = 'slim'
     finalizedBy 'reobfJar'
+}
+tasks.named('jarJar').configure {
+    applyModManifest(it)
+    archiveClassifier = ''
+    finalizedBy 'reobfJarJar'
+}
+reobf {
+    jarJar { }
 }
 
 tasks.withType(JavaCompile).configureEach {
