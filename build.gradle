@@ -32,6 +32,9 @@ minecraft {
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
+            // Prueba automática de GitHub (-Pdraviti_jvm="-Ddraviti.smoketest=true")
+            if (project.findProperty('draviti_jvm')) jvmArgs project.findProperty('draviti_jvm').toString().split(' ')
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main

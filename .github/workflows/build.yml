@@ -60,3 +60,45 @@ jobs:
         with:
           name: draviti-mod
           path: build/libs/*.jar
+
+  # Arranca el juego de verdad y obliga a aplicar todos los mixins del núcleo de gravedad
+  smoke:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Servidor
+        run: |
+          chmod +x ./gradlew
+          mkdir -p run && echo "eula=true" > run/eula.txt
+          timeout 1200 ./gradlew runServer --no-daemon \
+            -Pdraviti_jvm="-Ddraviti.smoketest=true" 2>&1 | tee server.log || true
+          grep -q "DRAVITI_SMOKE_OK" run/logs/latest.log server.log || { grep -E "DRAVITI_SMOKE|Mixin|Exception|ERROR" server.log | head -80; echo "::error::El servidor no pasó la prueba"; exit 1; }
+          echo "::notice::$(grep -ho 'DRAVITI_SMOKE_OK.*' server.log run/logs/latest.log | head -1)"
+
+      - name: Cliente (pantalla virtual)
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq xvfb libgl1-mesa-dri mesa-utils > /dev/null
+          export LIBGL_ALWAYS_SOFTWARE=1
+          timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --no-daemon \
+            -Pdraviti_jvm="-Ddraviti.smoketest=true" 2>&1 | tee client.log || true
+          grep -q "DRAVITI_SMOKE_OK" client.log run/logs/latest.log || { grep -E "DRAVITI_SMOKE|Mixin|Exception|ERROR" client.log | head -80; echo "::error::El cliente no pasó la prueba"; exit 1; }
+          echo "::notice::$(grep -ho 'DRAVITI_SMOKE_OK.*' client.log run/logs/latest.log | head -1)"
+
+      - name: Logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-logs
+          path: |
+            server.log
+            client.log
+            run/logs/
+            run/crash-reports/
