@@ -217,6 +217,11 @@ public class PowerData {
         buf.writeLong(egTalkDay);
         buf.writeLong(egEnterDay);
         buf.writeBoolean(egInside);
+        // Lo que cuesta desbloquear en cada estrella (config del servidor)
+        for (int s = 1; s <= 5; s++) {
+            buf.writeUtf(com.markadrii.draviti.config.CommonConfig.unlockItem(s));
+            buf.writeVarInt(com.markadrii.draviti.config.CommonConfig.unlockCount(s));
+        }
         buf.writeVarInt(egBought.size());
         for (String id : egBought) buf.writeUtf(id);
     }
@@ -245,6 +250,11 @@ public class PowerData {
         d.egTalkDay = buf.readLong();
         d.egEnterDay = buf.readLong();
         d.egInside = buf.readBoolean();
+        String[] items = new String[6];
+        int[] counts = new int[6];
+        for (int s = 1; s <= 5; s++) { items[s] = buf.readUtf(); counts[s] = buf.readVarInt(); }
+        com.markadrii.draviti.ethergear.EtherGear.syncedItems = items;
+        com.markadrii.draviti.ethergear.EtherGear.syncedCounts = counts;
         int nb = buf.readVarInt();
         for (int i = 0; i < nb; i++) d.egBought.add(buf.readUtf());
         return d;

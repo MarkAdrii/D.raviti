@@ -23,6 +23,7 @@ import java.util.UUID;
 
 /**
  * El vínculo con el Ether Gear, la entidad que vive dentro del poder (menú de la U, como el de Seals).
+ * Cada técnica pide su estrella y, la primera vez, un pago (por defecto 1 lingote de oro; se cambia en la config).
  * <ul>
  *   <li>5 estrellas. Cada estrella desbloquea técnicas; la 3.ª da +1500 de éter máximo.</li>
  *   <li>Afinidad: hablar con él (1 vez al día), cada día de Minecraft, estar cerca de otros jugadores, usar técnicas
@@ -56,13 +57,13 @@ public final class EtherGear {
     /** ¿Ya la puede usar? Estrella conseguida y, si pide alguna, pagada una vez (1 lingote de oro). */
     public static boolean unlocked(PowerData d, String abilityId) {
         int need = starsFor(abilityId);
-        return d.egStars >= need && (need == 0 || d.egBought.contains(abilityId));
+        return d.egStars >= need && (need == 0 || d.egBought.contains(abilityId) || cost(need).free());
     }
 
     /** Se puede pagar ya (tiene la estrella y aún no la ha comprado). */
     public static boolean canBuy(PowerData d, String abilityId) {
         int need = starsFor(abilityId);
-        return need > 0 && d.egStars >= need && !d.egBought.contains(abilityId);
+        return need > 0 && d.egStars >= need && !d.egBought.contains(abilityId) && !cost(need).free();
     }
 
     /** Botón Desbloquear del menú: cobra 1 lingote de oro la primera vez. index = posición en el poder. */
@@ -72,8 +73,10 @@ public final class EtherGear {
         if (d == null || pw == null || !Gravity.has(p) || index < 0 || index >= pw.abilities().size()) return;
         Ability a = pw.abilities().get(index);
         if (!canBuy(d, a.id())) return;
-        if (!p.getAbilities().instabuild && !takeGold(p)) {
-            p.displayClientMessage(Component.translatable("message.draviti.eg.no_gold").withStyle(ChatFormatting.RED), true);
+        Cost c = costFor(a.id());
+        if (!pay(p, c)) {
+            p.displayClientMessage(Component.translatable("message.draviti.eg.no_gold", c.count(), c.item().getDescription())
+                    .withStyle(ChatFormatting.RED), true);
             return;
         }
         d.egBought.add(a.id());
@@ -84,16 +87,57 @@ public final class EtherGear {
         PowerManager.sync(p);
     }
 
-    private static boolean takeGold(ServerPlayer p) {
+    /** Coste de desbloquear (la primera vez) las técnicas de una estrella. count 0 = gratis. */
+    public record Cost(net.minecraft.world.item.Item item, int count) {
+        public net.minecraft.world.item.ItemStack stack() { return new net.minecraft.world.item.ItemStack(item, Math.max(1, count)); }
+        public boolean free() { return count <= 0 || item == net.minecraft.world.item.Items.AIR; }
+    }
+
+    /** Lo que manda el servidor al cliente (la config común no viaja sola). Índice = estrella. */
+    public static String[] syncedItems;
+    public static int[] syncedCounts;
+
+    public static Cost cost(int star) {
+        String id; int count;
+        if (syncedItems != null && star >= 1 && star <= 5 && syncedItems[star] != null) {
+            id = syncedItems[star]; count = syncedCounts[star];
+        } else {
+            id = com.markadrii.draviti.config.CommonConfig.unlockItem(star);
+            count = com.markadrii.draviti.config.CommonConfig.unlockCount(star);
+        }
+        var rl = net.minecraft.resources.ResourceLocation.tryParse(id);
+        var item = rl == null ? null : net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(rl);
+        if (item == null || item == net.minecraft.world.item.Items.AIR) item = net.minecraft.world.item.Items.GOLD_INGOT;
+        return new Cost(item, count);
+    }
+
+    public static Cost costFor(String abilityId) { return cost(starsFor(abilityId)); }
+
+    /** ¿Lleva lo que pide? (en creativo, siempre). */
+    public static boolean canPay(Player p, Cost c) {
+        if (c.free() || p.getAbilities().instabuild) return true;
+        int have = 0;
         var inv = p.getInventory();
         for (int i = 0; i < inv.getContainerSize(); i++) {
-            var stack = inv.getItem(i);
-            if (stack.is(net.minecraft.world.item.Items.GOLD_INGOT)) {
-                stack.shrink(1);
-                return true;
-            }
+            var st = inv.getItem(i);
+            if (st.is(c.item())) have += st.getCount();
         }
-        return false;
+        return have >= c.count();
+    }
+
+    private static boolean pay(ServerPlayer p, Cost c) {
+        if (c.free() || p.getAbilities().instabuild) return true;
+        if (!canPay(p, c)) return false;
+        int left = c.count();
+        var inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize() && left > 0; i++) {
+            var st = inv.getItem(i);
+            if (!st.is(c.item())) continue;
+            int take = Math.min(left, st.getCount());
+            st.shrink(take);
+            left -= take;
+        }
+        return true;
     }
 
     public static int affinityMax(int stars) { return AFFINITY_MAX[Math.max(0, Math.min(MAX_STARS, stars))]; }

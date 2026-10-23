@@ -86,8 +86,9 @@ En el lore el éter es una fuerza natural y dentro de ti tiene forma: el **Ether
 blanco, aureola morada, alas de murciélago, ojos morados y marcas de éter por el cuerpo. Con el poder, **U** abre su
 menú (como el de Seals): estrellas, afinidad y su modelo en 3D a la derecha. Abajo:
 
-- **Habilidades:** la lista de técnicas. Cada una pide dos cosas: su **estrella** y, la primera vez, **1 lingote de oro**
-  (botón Desbloquear). Al pulsarla también ves daño, éter y enfriamiento.
+- **Habilidades:** la lista de técnicas. Cada una pide dos cosas: su **estrella** y, la primera vez, un pago (botón
+  Desbloquear). Por defecto 1 lingote de oro; se cambia por estrella en `config/draviti-common.toml` → `[ether_gear]`
+  (`item` y `count`, 0 = gratis). Al pulsarla también ves daño, éter y enfriamiento.
 - **Hablar:** una vez al día.
 - **Entrar:** con 1 estrella, cada 3 días. Te lleva a su interior (una plataforma negra con líneas de éter); clic
   derecho sobre él para hablar, meditar (rellena el éter) o salir.
@@ -96,7 +97,7 @@ menú (como el de Seals): estrellas, afinidad y su modelo en 3D a la derecha. Ab
 +25, cerca de otros jugadores +3 por minuto, usar técnicas +2 cada 15 s, charlar +5 y meditar +20 en su interior.
 Todo se cambia en `config/draviti-common.toml` (en "pasivas").
 
-| Estrellas | Se pueden desbloquear (1 lingote de oro cada una) |
+| Estrellas | Se pueden desbloquear (pagando lo que pida cada estrella) |
 |---|---|
 | 0 | Puño Gravitatorio, Cañón Gravitatorio, Antigravedad, Ingravidez |
 | ★ | Gravity Swap, Onda Gravitatoria, Ráfaga de Puños, Patada Molinete, entrar en su interior |

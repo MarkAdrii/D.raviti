@@ -109,7 +109,7 @@ public class EtherGearScreen extends Screen {
         drawHeader(g, d);
         info = Info.BOND;
         lastMouseX = mouseX; lastMouseY = mouseY;
-        buyTip = false;
+        buyTip = null;
         buyBtn = null;
         if (abilitiesPage) {
             drawAbilityList(g, d, mouseX, mouseY);
@@ -121,7 +121,8 @@ public class EtherGearScreen extends Screen {
         }
         drawRight(g, partialTick);
         drawFooter(g, d, mouseX, mouseY);
-        if (buyTip) g.renderTooltip(font, Component.translatable("screen.draviti.eg.tip.no_gold"), mouseX, mouseY);
+        if (buyTip != null) g.renderTooltip(font, Component.translatable("screen.draviti.eg.tip.no_gold",
+                buyTip.count(), buyTip.item().getDescription()), mouseX, mouseY);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -274,7 +275,7 @@ public class EtherGearScreen extends Screen {
             Ability a = abilities.get(i);
             int need = EtherGear.starsFor(a.id());
             boolean open = EtherGear.unlocked(d, a.id());
-            boolean buyable = EtherGear.canBuy(d, a.id());
+            boolean buyable = EtherGear.canBuy(d, a.id()) && !EtherGear.costFor(a.id()).free();
             boolean sel = i == selected, hov = hover(mouseX, mouseY, x, y, bw, ROW - 2);
             g.fill(x, y, x + bw, y + ROW - 2, sel ? HEADER : hov ? 0xFF3A2752 : PANEL_L);
             outline(g, x, y, bw, ROW - 2, BORDER);
@@ -291,7 +292,7 @@ public class EtherGearScreen extends Screen {
                 g.pose().pushPose();
                 g.pose().translate(x + bw - 3 - need * 8 - 11, y + 2, 0);
                 g.pose().scale(0.6F, 0.6F, 1F);
-                g.renderItem(GOLD, 0, 0);
+                g.renderItem(EtherGear.costFor(a.id()).stack(), 0, 0);
                 g.pose().popPose();
             }
             y += ROW;
@@ -306,14 +307,13 @@ public class EtherGearScreen extends Screen {
         if (pw == null) return;
     }
 
-    private static final net.minecraft.world.item.ItemStack GOLD = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLD_INGOT);
     private int[] buyBtn;
-    private boolean buyTip;
+    private EtherGear.Cost buyTip;
     private int lastMouseX, lastMouseY;
 
-    private static boolean hasGold() {
+    private boolean hasGold() {
         var p = Minecraft.getInstance().player;
-        return p != null && (p.getAbilities().instabuild || p.getInventory().contains(GOLD));
+        return p != null && selected < abilities.size() && EtherGear.canPay(p, EtherGear.costFor(abilities.get(selected).id()));
     }
 
     private void drawAbilityDetail(GuiGraphics g, PowerData d) {
@@ -344,14 +344,23 @@ public class EtherGearScreen extends Screen {
                 g.drawString(font, miss, x + bw - font.width(miss), y, MUTED, false);
             }
             y += 10;
-            Component goldLine = Component.literal(paid ? "✔ " : "✖ ")
-                    .append(Component.translatable(paid ? "screen.draviti.eg.req.paid" : "screen.draviti.eg.req.gold"));
-            g.drawString(font, goldLine, x, y, paid ? OK : NO, false);
-            g.pose().pushPose();
-            g.pose().translate(x + font.width(goldLine) + 2, y - 2, 0);
-            g.pose().scale(0.7F, 0.7F, 1F);
-            g.renderItem(GOLD, 0, 0);
-            g.pose().popPose();
+            EtherGear.Cost cost = EtherGear.costFor(a.id());
+            boolean ok2 = paid || cost.free();
+            Component goldLine = Component.literal(ok2 ? "✔ " : "✖ ").append(paid ? Component.translatable("screen.draviti.eg.req.paid")
+                    : cost.free() ? Component.translatable("screen.draviti.eg.req.free")
+                    : Component.translatable("screen.draviti.eg.req.gold", cost.count(), cost.item().getDescription()));
+            for (FormattedCharSequence line : font.split(goldLine, bw - 14)) {
+                g.drawString(font, line, x, y, ok2 ? OK : NO, false);
+                y += 9;
+            }
+            if (!cost.free()) {
+                g.pose().pushPose();
+                g.pose().translate(x + bw - 12, y - 11, 0);
+                g.pose().scale(0.7F, 0.7F, 1F);
+                g.renderItem(cost.stack(), 0, 0);
+                g.pose().popPose();
+            }
+            y += 3;
             y += 12;
             if (EtherGear.canBuy(d, a.id())) {
                 Component label = Component.translatable("screen.draviti.eg.buy");
@@ -364,7 +373,7 @@ public class EtherGearScreen extends Screen {
                     g.fill(x - 1, y - 1, x + bwid + 1, y + 17, BORDER);
                     g.fill(x, y, x + bwid, y + 16, 0xFF3A3346);
                     g.drawString(font, label, x + bwid / 2 - font.width(label) / 2, y + 4, 0xFF8A809A, false);
-                    if (hover(lastMouseX, lastMouseY, x, y, bwid, 16)) buyTip = true;
+                    if (hover(lastMouseX, lastMouseY, x, y, bwid, 16)) buyTip = cost;
                 }
                 y += 20;
             }
