@@ -133,7 +133,7 @@ public final class PlayTest {
             case 230 -> { state(mc, "invocado"); shot(mc, "04_invocado"); }
             case 240 -> server(mc, p -> {
                 for (var e : p.serverLevel().getEntities(com.markadrii.draviti.registry.ModEntities.ETHER_GEAR.get(), x -> true))
-                    if (e instanceof EtherGearEntity eg && eg.isCompanion()) EtherGearCompanion.up(p, eg);
+                    if (e.isCompanion()) EtherGearCompanion.up(p, e);
             });
             case 280 -> { state(mc, "hombro"); shot(mc, "05_hombro"); }
             case 290 -> { mc.options.setCameraType(CameraType.FIRST_PERSON); cmd(mc, "draviti estrellas @s 1"); }
