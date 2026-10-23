@@ -172,6 +172,7 @@ public final class DravitiCommand {
             if (d == null) continue;
             d.egTalkDay = -100;
             d.egEnterDay = -100;
+            d.egBorrowDay = -100; // también el préstamo de transformación
             PowerManager.sync(p);
         }
         c.getSource().sendSuccess(() -> Component.translatable("command.draviti.waits"), true);
