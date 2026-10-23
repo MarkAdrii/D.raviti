@@ -99,9 +99,6 @@ for (x0, inner_right) in ((2, True), (10, False)):
 # Sonrisita con dientecitos
 mouth = [(5, 11), (6, 12), (7, 12), (8, 12), (9, 12), (10, 11)]
 for x, y in mouth: px(f[0] * K + x, f[1] * K + y, MOUTH)
-for x in range(6, 10):
-    px(f[0] * K + x, f[1] * K + 11, TEETH if x % 2 == 0 else (200, 176, 236, 255))
-    px(f[0] * K + x, f[1] * K + 11, (190, 150, 240, 120), glow)
 px(f[0] * K + 4, f[1] * K + 10, BLACK_L); px(f[0] * K + 11, f[1] * K + 10, BLACK_L)
 
 # ---------------------------------------------------------------- pelo morado
@@ -133,9 +130,6 @@ fill(BG["bottom"], lambda i, j, W, H: CLEAR)
 fill(BG["right"], lambda i, j, W, H: HAIR if j < 3 else CLEAR)
 fill(BG["left"], lambda i, j, W, H: HAIR if j < 3 else CLEAR)
 
-# Piquitos de pelo: blancos con la base un poco más oscura
-box_all(36, 37, 2, 2, 2, lambda i, j, W, H: HAIR_D if j == H - 1 else HAIR_L if (i + j) % 5 == 0 else HAIR)
-box_all(44, 37, 1, 1, 1, lambda i, j, W, H: HAIR_L)
 # Cuernos: negros con la punta morada
 box_all(52, 14, 2, 3, 2, lambda i, j, W, H: MARK_D if j < 2 else BLACK_L if j < 3 else BLACK)
 F = faces(52, 14, 2, 3, 2)

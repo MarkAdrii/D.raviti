@@ -51,7 +51,7 @@ public class EtherGearModel extends HierarchicalModel<EtherGearEntity> {
                 PartPose.offset(0F, 14F, 0F));
         PartDefinition hair = head.addOrReplaceChild("hair", CubeListBuilder.create().texOffs(30, 0).addBox(-4.5F, -8F, -4F, 9F, 3F, 8F),
                 PartPose.offset(0F, 0F, 0F));
-        PartDefinition bangs = head.addOrReplaceChild("bangs", CubeListBuilder.create().texOffs(20, 26).addBox(-4F, -5.5F, -4.6F, 8F, 3F, 1F),
+        PartDefinition bangs = head.addOrReplaceChild("bangs", CubeListBuilder.create().texOffs(20, 26).addBox(-4F, -7F, -4.6F, 8F, 3F, 1F),
                 PartPose.offset(0F, 0F, 0F));
         PartDefinition halo = head.addOrReplaceChild("halo", CubeListBuilder.create(),
                 PartPose.offsetAndRotation(0F, -10.5F, 0.5F, -0.209F, 0F, 0F));
@@ -79,22 +79,6 @@ public class EtherGearModel extends HierarchicalModel<EtherGearEntity> {
                 PartPose.offsetAndRotation(1.8F, 0F, -3.118F, 0F, -3.665F, 0F));
         PartDefinition halo11 = halo.addOrReplaceChild("halo11", CubeListBuilder.create().texOffs(26, 37).addBox(-1F, -0.5F, -0.5F, 2F, 1F, 1F),
                 PartPose.offsetAndRotation(3.118F, 0F, -1.8F, 0F, -4.189F, 0F));
-        PartDefinition tuft0 = head.addOrReplaceChild("tuft0", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(-2.5F, -8F, -1.2F, 0F, 0.785F, -0.314F));
-        PartDefinition tuft1 = head.addOrReplaceChild("tuft1", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(1.2F, -8F, -2.2F, -0.209F, 0.785F, 0.244F));
-        PartDefinition tuft2 = head.addOrReplaceChild("tuft2", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(3F, -8F, 1.2F, 0.175F, 0.785F, 0.419F));
-        PartDefinition tuft3 = head.addOrReplaceChild("tuft3", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(-1F, -8F, 2.2F, 0.384F, 0.785F, -0.105F));
-        PartDefinition tuft4 = head.addOrReplaceChild("tuft4", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(-4.4F, -6.4F, 0.3F, 0F, 0.785F, -0.838F));
-        PartDefinition tuft5 = head.addOrReplaceChild("tuft5", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(4.4F, -6.4F, -0.8F, 0F, 0.785F, 0.838F));
-        PartDefinition tuft6 = head.addOrReplaceChild("tuft6", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(0.5F, -6.6F, 3.9F, 0.908F, 0.785F, 0F));
-        PartDefinition tuft7 = head.addOrReplaceChild("tuft7", CubeListBuilder.create().texOffs(36, 37).addBox(-1F, -2F, -1F, 2F, 2F, 2F).texOffs(44, 37).addBox(-0.5F, -3F, -0.5F, 1F, 1F, 1F),
-                PartPose.offsetAndRotation(-2.8F, -5.5F, 3.6F, 0.838F, 0.785F, -0.524F));
         PartDefinition hornl = head.addOrReplaceChild("horn_l", CubeListBuilder.create().texOffs(52, 14).addBox(-2F, -2F, -1F, 2F, 3F, 2F),
                 PartPose.offsetAndRotation(-4F, -2.5F, -0.5F, 0F, 0F, 0.349F));
         PartDefinition hornr = head.addOrReplaceChild("horn_r", CubeListBuilder.create().texOffs(52, 14).addBox(0F, -2F, -1F, 2F, 3F, 2F),
