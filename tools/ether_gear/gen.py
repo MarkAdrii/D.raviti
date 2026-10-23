@@ -88,23 +88,14 @@ for (u, v) in ((36, 14), (44, 14)):
 H = faces(0, 0, 8, 7, 7)
 box_all(0, 0, 8, 7, 7, black_skin)
 f = H["front"]  # 16 x 14 px
-# Ojos rasgados que miran hacia el centro (como los de la referencia), pero morados y brillantes
-eye_l = [(2, 6), (3, 5), (4, 5), (5, 5), (6, 6), (6, 7), (5, 8), (4, 8), (3, 7)]
-def eye(cx, mirror):
-    pts = [(2, 0), (3, 0), (4, 0), (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2),
-           (1, 3), (2, 3), (3, 3), (4, 3), (2, 4), (3, 4)]
-    for (x, y) in pts:
-        xx = cx + (5 - x if mirror else x); yy = 5 + y
-        c = EYE_D if y >= 3 or (x in (0, 5)) else EYE
-        dot(f, xx, yy, c)
-    # brillo
-    hx = cx + (5 - 2 if mirror else 2)
-    dot(f, hx, 6, EYE_L); dot(f, hx + (-1 if mirror else 1), 6, EYE_L)
-    # cejita inclinada (le da la cara traviesa)
-    for k in range(4):
-        x = cx + (5 - k - 1 if mirror else k + 1)
-        px(f[0] * K + x, f[1] * K + 4 - (k // 2 if not mirror else (3 - k) // 2) , BLACK_L)
-eye(1, False); eye(9, True)
+# Ojos estilo Minecraft: 2 x 1 (blanco lila por fuera, pupila morada brillante por dentro)
+EYE_W = (236, 226, 255, 255)
+for (x0, inner_right) in ((2, True), (10, False)):
+    for x in range(4):
+        for y in range(6, 8):
+            pupil = (x >= 2) if inner_right else (x < 2)
+            c = EYE if pupil else EYE_W
+            dot(f, x0 + x, y, c)
 # Sonrisita con dientecitos
 mouth = [(5, 11), (6, 12), (7, 12), (8, 12), (9, 12), (10, 11)]
 for x, y in mouth: px(f[0] * K + x, f[1] * K + y, MOUTH)
@@ -114,18 +105,17 @@ for x in range(6, 10):
 px(f[0] * K + 4, f[1] * K + 10, BLACK_L); px(f[0] * K + 11, f[1] * K + 10, BLACK_L)
 
 # ---------------------------------------------------------------- pelo morado
-def hair_fn(i, j, W, H):
-    # mechones verticales con brillo arriba
-    strand = (i * 7 + (i // 3) * 5) % 9
-    c = HAIR_L if strand == 0 else HAIR_D if strand in (4, 5) else HAIR
-    return c
-box_all(30, 0, 9, 3, 8, hair_fn, ("top",))
-# Lados del pelo: mechones que caen en punta (con huecos), así no parece un gorro
-def fringe(i, j, W, H):
+def strands(i):
+    """Mismo patrón de mechones en todas las caras (cada 6 px uno claro y uno oscuro)."""
     k = i % 6
-    depth = (2, 4, 6, 5, 3, 1)[k]
+    return HAIR_L if k == 0 else HAIR_D if k == 4 else HAIR
+fill(faces(30, 0, 9, 3, 8)["top"], lambda i, j, W, H: strands(i))
+# Lados: las mismas columnas de mechones que arriba y abajo acaban en puntas
+def fringe(i, j, W, H):
+    depth = (3, 5, 5, 4, 3, 2)[i % 6]
     if j > depth: return CLEAR
-    return HAIR_O if j == depth else HAIR_D if k in (0, 5) else HAIR
+    if j == depth: return HAIR_O
+    return strands(i)
 for name in ("front", "back", "right", "left"):
     fill(faces(30, 0, 9, 3, 8)[name], fringe)
 fill(faces(30, 0, 9, 3, 8)["bottom"], lambda i, j, W, H: HAIR_D)
@@ -135,14 +125,17 @@ def bangs_front(i, j, W, H):
     k = i % 4
     depth = {0: 1, 1: 3, 2: 2, 3: 0}[k] if (i // 4) % 2 == 0 else {0: 0, 1: 2, 2: 3, 3: 1}[k]
     if j >= depth + 1: return CLEAR
-    return HAIR_O if j == depth else HAIR_L if j == 0 else HAIR
+    return HAIR_O if j == depth else strands(i)
 BG = faces(20, 26, 8, 3, 1)
 fill(BG["front"], bangs_front); fill(BG["back"], bangs_front)
-fill(BG["top"], lambda i, j, W, H: HAIR)
+fill(BG["top"], lambda i, j, W, H: strands(i))
 fill(BG["bottom"], lambda i, j, W, H: CLEAR)
 fill(BG["right"], lambda i, j, W, H: HAIR if j < 3 else CLEAR)
 fill(BG["left"], lambda i, j, W, H: HAIR if j < 3 else CLEAR)
 
+# Piquitos de pelo: blancos con la base un poco más oscura
+box_all(36, 37, 2, 2, 2, lambda i, j, W, H: HAIR_D if j == H - 1 else HAIR_L if (i + j) % 5 == 0 else HAIR)
+box_all(44, 37, 1, 1, 1, lambda i, j, W, H: HAIR_L)
 # Cuernos: negros con la punta morada
 box_all(52, 14, 2, 3, 2, lambda i, j, W, H: MARK_D if j < 2 else BLACK_L if j < 3 else BLACK)
 F = faces(52, 14, 2, 3, 2)
