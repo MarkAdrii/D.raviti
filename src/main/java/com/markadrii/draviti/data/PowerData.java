@@ -32,6 +32,19 @@ public class PowerData {
     /** Se ve la marca del Ether Gear en el brazo (F dos veces para ocultarla). */
     public boolean showMark = true;
 
+    // ---- Vínculo con el Ether Gear (menú de la U) ----
+    /** Estrellas (0-5) y afinidad dentro de la estrella actual. */
+    public int egStars, egAffinity;
+    /** Último día de Minecraft en que se habló, se entró en su interior y se contó para la afinidad diaria. */
+    public long egTalkDay = -100, egEnterDay = -100, egDay = -1;
+    /** Está dentro del interior del Ether Gear y a dónde volver (solo servidor). */
+    public boolean egInside;
+    public String egReturnDim = "";
+    public double egRx, egRy, egRz;
+    public float egRyaw;
+    /** Respuestas ya usadas en esta visita (bits). */
+    public int egVisit;
+
     public static String key(Power power, Ability ability) {
         return power.id() + "/" + ability.id();
     }
@@ -56,12 +69,17 @@ public class PowerData {
 
     /** ¿Está desbloqueada? (si necesita otra habilidad activa del mismo poder). */
     public boolean isUnlocked(Power power, Ability ability) {
+        // Estrellas del Ether Gear
+        if (power.id().equals(com.markadrii.draviti.gravity.Gravity.POWER_ID)
+                && egStars < com.markadrii.draviti.ethergear.EtherGear.starsFor(ability.id())) return false;
         if (ability.requires() == null) return true;
         return power.ability(ability.requires()).map(r -> state(power, r).enabled).orElse(true);
     }
 
     public int energy(Power power, String bar) { return energy.getOrDefault(power.id() + "/" + bar, 0); }
-    public int maxEnergy(Power power, String bar, int def) { return energyMax.getOrDefault(power.id() + "/" + bar, def); }
+    public int maxEnergy(Power power, String bar, int def) {
+        return energyMax.getOrDefault(power.id() + "/" + bar, def) + com.markadrii.draviti.ethergear.EtherGear.bonusMax(this, power, bar);
+    }
     public void setMaxEnergy(Power power, String bar, int max) { energyMax.put(power.id() + "/" + bar, max); dirty = true; }
     public boolean hasEnergy(Power power, String bar) { return energy.containsKey(power.id() + "/" + bar); }
     public void setEnergy(Power power, String bar, int value) {
@@ -86,6 +104,10 @@ public class PowerData {
         energyMax.putAll(other.energyMax);
         breakBlocks = other.breakBlocks;
         showMark = other.showMark;
+        egStars = other.egStars; egAffinity = other.egAffinity;
+        egTalkDay = other.egTalkDay; egEnterDay = other.egEnterDay; egDay = other.egDay;
+        egInside = other.egInside; egReturnDim = other.egReturnDim;
+        egRx = other.egRx; egRy = other.egRy; egRz = other.egRz; egRyaw = other.egRyaw; egVisit = other.egVisit;
     }
 
     // ---- NBT ----
@@ -113,6 +135,16 @@ public class PowerData {
         tag.put("EnergyMax", mx);
         tag.putBoolean("BreakBlocks", breakBlocks);
         tag.putBoolean("ShowMark", showMark);
+        CompoundTag eg = new CompoundTag();
+        eg.putInt("Stars", egStars);
+        eg.putInt("Affinity", egAffinity);
+        eg.putLong("TalkDay", egTalkDay);
+        eg.putLong("EnterDay", egEnterDay);
+        eg.putLong("Day", egDay);
+        eg.putBoolean("Inside", egInside);
+        eg.putString("ReturnDim", egReturnDim);
+        eg.putDouble("Rx", egRx); eg.putDouble("Ry", egRy); eg.putDouble("Rz", egRz); eg.putFloat("Ryaw", egRyaw);
+        tag.put("EtherGear", eg);
         return tag;
     }
 
@@ -143,6 +175,15 @@ public class PowerData {
         for (String k : mx.getAllKeys()) energyMax.put(k, mx.getInt(k));
         breakBlocks = !tag.contains("BreakBlocks") || tag.getBoolean("BreakBlocks");
         showMark = !tag.contains("ShowMark") || tag.getBoolean("ShowMark");
+        CompoundTag eg = tag.getCompound("EtherGear");
+        egStars = eg.getInt("Stars");
+        egAffinity = eg.getInt("Affinity");
+        egTalkDay = eg.contains("TalkDay") ? eg.getLong("TalkDay") : -100;
+        egEnterDay = eg.contains("EnterDay") ? eg.getLong("EnterDay") : -100;
+        egDay = eg.contains("Day") ? eg.getLong("Day") : -1;
+        egInside = eg.getBoolean("Inside");
+        egReturnDim = eg.getString("ReturnDim");
+        egRx = eg.getDouble("Rx"); egRy = eg.getDouble("Ry"); egRz = eg.getDouble("Rz"); egRyaw = eg.getFloat("Ryaw");
     }
 
     // ---- Red ----
@@ -162,6 +203,11 @@ public class PowerData {
         energy.forEach((k, v) -> { buf.writeUtf(k); buf.writeVarInt(v); });
         buf.writeVarInt(energyMax.size());
         energyMax.forEach((k, v) -> { buf.writeUtf(k); buf.writeVarInt(v); });
+        buf.writeVarInt(egStars);
+        buf.writeVarInt(egAffinity);
+        buf.writeLong(egTalkDay);
+        buf.writeLong(egEnterDay);
+        buf.writeBoolean(egInside);
     }
 
     public static PowerData read(FriendlyByteBuf buf) {
@@ -183,6 +229,11 @@ public class PowerData {
         for (int i = 0; i < e; i++) d.energy.put(buf.readUtf(), buf.readVarInt());
         int mx = buf.readVarInt();
         for (int i = 0; i < mx; i++) d.energyMax.put(buf.readUtf(), buf.readVarInt());
+        d.egStars = buf.readVarInt();
+        d.egAffinity = buf.readVarInt();
+        d.egTalkDay = buf.readLong();
+        d.egEnterDay = buf.readLong();
+        d.egInside = buf.readBoolean();
         return d;
     }
 }

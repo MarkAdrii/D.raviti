@@ -9,7 +9,9 @@ import java.util.function.Supplier;
 
 /** Del cliente al servidor: vuelo sónico (empezar/parar), dash y cambiar si se rompen bloques. */
 public record MovePacket(int action, float x, float z) {
-    public static final int SONIC_START = 0, SONIC_STOP = 1, DASH = 2, TOGGLE_BLOCKS = 3, TOGGLE_MARK = 4, TOGGLE_FLOAT = 5;
+    public static final int SONIC_START = 0, SONIC_STOP = 1, DASH = 2, TOGGLE_BLOCKS = 3, TOGGLE_MARK = 4, TOGGLE_FLOAT = 5,
+            /** Ether Gear: hablar, entrar en su interior y elegir respuesta (x = opción). */
+            EG_TALK = 6, EG_ENTER = 7, EG_DIALOG = 8;
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeVarInt(action);

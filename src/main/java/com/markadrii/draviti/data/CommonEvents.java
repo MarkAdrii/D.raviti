@@ -66,7 +66,10 @@ public final class CommonEvents {
 
     @SubscribeEvent
     public static void tick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer sp) PowerManager.tick(sp);
+        if (event.phase == TickEvent.Phase.END && event.player instanceof ServerPlayer sp) {
+            PowerManager.tick(sp);
+            com.markadrii.draviti.ethergear.EtherGear.tick(sp);
+        }
     }
 
     @SubscribeEvent

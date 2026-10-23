@@ -14,6 +14,10 @@ public final class ModKeys {
     public static final String CATEGORY = "key.categories.draviti";
     private static final int[] DEFAULTS = {GLFW.GLFW_KEY_V, GLFW.GLFW_KEY_B, GLFW.GLFW_KEY_N, GLFW.GLFW_KEY_M, GLFW.GLFW_KEY_COMMA};
 
+    /** U: menú del Ether Gear (siempre de D.raviti, no se comparte con Cursed Crown). */
+    public static final KeyMapping ETHER_GEAR = new KeyMapping("key.draviti.ether_gear",
+            KeyConflictContext.IN_GAME, InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_U, CATEGORY);
+
     private static final KeyMapping[] ABILITIES = new KeyMapping[5];
     private static KeyMapping switchList;
 

@@ -26,6 +26,9 @@ import java.util.Collection;
  * /draviti eter &lt;jugadores&gt; &lt;valor&gt; — pone la barra de éter (y /draviti cinetica igual).
  * /draviti eter_max|cinetica_max &lt;jugadores&gt; &lt;valor&gt; — cambia el máximo de cada barra (por defecto 1000).
  * /draviti lista [jugador]
+ * /draviti estrellas &lt;jugadores&gt; &lt;0-5&gt; [afinidad] — estrellas del Ether Gear.
+ * /draviti afinidad &lt;jugadores&gt; &lt;valor&gt; — suma afinidad con el Ether Gear.
+ * /draviti esperas &lt;jugadores&gt; — se puede volver a hablar con él y entrar en su interior ya.
  */
 public final class DravitiCommand {
     private DravitiCommand() {}
@@ -63,6 +66,19 @@ public final class DravitiCommand {
                         .then(Commands.argument("jugadores", EntityArgument.players())
                                 .then(Commands.argument("valor", IntegerArgumentType.integer(1, MAX_CAP))
                                         .executes(c -> cap(c, Gravity.KINETIC)))))
+                .then(Commands.literal("estrellas")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .then(Commands.argument("estrellas", IntegerArgumentType.integer(0, 5))
+                                        .executes(c -> stars(c, 0))
+                                        .then(Commands.argument("afinidad", IntegerArgumentType.integer(0, 2000))
+                                                .executes(c -> stars(c, IntegerArgumentType.getInteger(c, "afinidad")))))))
+                .then(Commands.literal("afinidad")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .then(Commands.argument("valor", IntegerArgumentType.integer(1, 100000))
+                                        .executes(DravitiCommand::affinity))))
+                .then(Commands.literal("esperas")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .executes(DravitiCommand::resetWaits)))
                 .then(Commands.literal("lista")
                         .executes(c -> list(c, c.getSource().getPlayerOrException()))
                         .then(Commands.argument("jugador", EntityArgument.player())
@@ -108,12 +124,40 @@ public final class DravitiCommand {
             var d = PowerCapability.get(p).orElse(null);
             if (d == null || power == null) continue;
             d.setMaxEnergy(power, bar, v);
-            if (Gravity.ETHER.equals(bar)) Gravity.setEther(p, Math.min(Gravity.ether(p), v));
+            if (Gravity.ETHER.equals(bar)) Gravity.setEther(p, Math.min(Gravity.ether(p), Gravity.etherMax(p)));
             else Gravity.setKinetic(p, Math.min(Gravity.kinetic(p), v));
             PowerManager.sync(p);
         }
         c.getSource().sendSuccess(() -> Component.translatable(Gravity.ETHER.equals(bar)
                 ? "command.draviti.ether_max" : "command.draviti.kinetic_max", v), true);
+        return 1;
+    }
+
+    private static int stars(CommandContext<CommandSourceStack> c, int affinity) throws CommandSyntaxException {
+        int st = IntegerArgumentType.getInteger(c, "estrellas");
+        for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores"))
+            com.markadrii.draviti.ethergear.EtherGear.set(p, st, affinity);
+        c.getSource().sendSuccess(() -> Component.translatable("command.draviti.stars", st), true);
+        return 1;
+    }
+
+    private static int affinity(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        int v = IntegerArgumentType.getInteger(c, "valor");
+        for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores"))
+            com.markadrii.draviti.ethergear.EtherGear.addAffinity(p, v, "message.draviti.eg.reason.command");
+        c.getSource().sendSuccess(() -> Component.translatable("command.draviti.affinity", v), true);
+        return 1;
+    }
+
+    private static int resetWaits(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores")) {
+            var d = PowerCapability.get(p).orElse(null);
+            if (d == null) continue;
+            d.egTalkDay = -100;
+            d.egEnterDay = -100;
+            PowerManager.sync(p);
+        }
+        c.getSource().sendSuccess(() -> Component.translatable("command.draviti.waits"), true);
         return 1;
     }
 

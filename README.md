@@ -80,6 +80,32 @@ El giro de la gravedad (hitbox, físicas, cámara, controles y modelo del jugado
 de Gaider10), copiado en `gravitycore/` bajo su licencia MIT (`GRAVITY_CHANGER_LICENSE.txt`). No hace falta instalarlo;
 si alguien lo tiene instalado, D.raviti desactiva su copia y usa el de Gravity Control para que no se giren las cosas dos veces.
 
+## El Ether Gear (tecla U)
+
+En el lore el éter es una fuerza natural y dentro de ti tiene forma: el **Ether Gear**, un diablillo negro con pelo
+blanco, aureola morada, alas de murciélago, ojos morados y marcas de éter por el cuerpo. Con el poder, **U** abre su
+menú (como el de Seals): estrellas, afinidad y su modelo en 3D a la derecha. Abajo:
+
+- **Habilidades:** la lista de técnicas; al pulsar una ves qué estrella pide (y si necesita otra activa), daño, éter y enfriamiento.
+- **Hablar:** una vez al día.
+- **Entrar:** con 1 estrella, cada 3 días. Te lleva a su interior (una plataforma negra con líneas de éter); clic
+  derecho sobre él para hablar, meditar (rellena el éter) o salir.
+
+**Afinidad** (barra de 100 / 300 / 700 / 1000 / 1500 / 2000 según las estrellas): hablar +15, cada día de Minecraft
++25, cerca de otros jugadores +3 por minuto, usar técnicas +2 cada 15 s, charlar +5 y meditar +20 en su interior.
+Todo se cambia en `config/draviti-common.toml` (en "pasivas").
+
+| Estrellas | Desbloquea |
+|---|---|
+| 0 | Puño Gravitatorio, Cañón Gravitatorio, Antigravedad, Ingravidez |
+| ★ | Gravity Swap, Onda Gravitatoria, Ráfaga de Puños, Patada Molinete, entrar en su interior |
+| ★★ | Overdrive, Centro de Gravedad, Cometa, Placaje, Ingravidez Ajena |
+| ★★★ | +1500 de éter máximo, Impacto Gravitatorio, Peso Infernal, Campo Gravitatorio |
+| ★★★★ | Meteor Breaker, Cielo Negro |
+| ★★★★★ | Overdrive Completo |
+
+Comandos: `/draviti estrellas @s 3`, `/draviti afinidad @s 200`, `/draviti esperas @s` (hablar y entrar ya).
+
 ## Formas y colores
 
 | Forma | Color de los efectos | Daño | Tamaño (alcance, radios, cráteres) |

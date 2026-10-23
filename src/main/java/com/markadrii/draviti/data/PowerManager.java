@@ -156,6 +156,7 @@ public final class PowerManager {
                     }
                 }
             }
+            if (changed && pressed) com.markadrii.draviti.ethergear.EtherGear.onAbilityUsed(player);
             if (changed) sync(player);
         });
     }

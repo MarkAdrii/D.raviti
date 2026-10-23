@@ -276,6 +276,8 @@ public final class Gravity {
         if (!CommonConfig.breakBlocks() || radius < 0.5) return;
         PowerData pd = data(p);
         if (pd != null && !pd.breakBlocks) return;
+        // En el interior del Ether Gear nunca se rompe nada
+        if (p.level().dimension() == com.markadrii.draviti.ethergear.EtherGearInterior.KEY) return;
         ServerLevel level = p.serverLevel();
         float max = CommonConfig.maxHardness();
         int r = (int) Math.ceil(radius);

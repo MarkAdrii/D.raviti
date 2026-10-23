@@ -32,6 +32,7 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerKeys(RegisterKeyMappingsEvent event) {
         ModKeys.register(event);
+        event.register(ModKeys.ETHER_GEAR);
     }
 
     @SubscribeEvent
@@ -42,6 +43,13 @@ public final class ClientModEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.GRAVITY_SPHERE.get(), GravitySphereRenderer::new);
+        event.registerEntityRenderer(ModEntities.ETHER_GEAR.get(), com.markadrii.draviti.client.ethergear.EtherGearRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        event.registerLayerDefinition(com.markadrii.draviti.client.ethergear.EtherGearModel.LAYER,
+                com.markadrii.draviti.client.ethergear.EtherGearModel::createBodyLayer);
     }
 
     @SubscribeEvent

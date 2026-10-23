@@ -39,6 +39,9 @@ public final class GravityMovement {
                 Gravity.sound(p, p.position(), SoundEvents.AMETHYST_BLOCK_CHIME, 1F, d.showMark ? 1.4F : 0.8F);
                 PowerManager.sync(p);
             }
+            case MovePacket.EG_TALK -> com.markadrii.draviti.ethergear.EtherGear.talk(p);
+            case MovePacket.EG_ENTER -> com.markadrii.draviti.ethergear.EtherGearInterior.enter(p);
+            case MovePacket.EG_DIALOG -> com.markadrii.draviti.ethergear.EtherGearInterior.choose(p, (int) m.x());
             case MovePacket.TOGGLE_FLOAT -> PowerManager.onKey(p, Gravity.power().id(), "ingravidez", true);
             case MovePacket.SONIC_START -> {
                 if (a == null || !Gravity.active(p, "ingravidez") || GravityAbilities.SONIC.contains(p.getUUID())) return;

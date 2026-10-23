@@ -233,7 +233,7 @@ public class AbilityBarOverlay implements IGuiOverlay {
         return best;
     }
 
-    static void drawIcon(GuiGraphics g, Icon icon, int x, int y) {
+    public static void drawIcon(GuiGraphics g, Icon icon, int x, int y) {
         if (icon.isTexture() && icon.region() != null) {
             int[] r = icon.region();
             RenderSystem.enableBlend();
