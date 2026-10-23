@@ -50,6 +50,17 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 - Las dos barras son una sola: **X** pasa por las listas de Cursed Crown y luego por las del Dios de la Gravedad.
   Se dibuja en la posición que tenga la barra de Cursed Crown.
 
+### Con Epic Fight
+
+D.raviti funciona con [Epic Fight](https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod) (no hace falta):
+la marca del Ether Gear, el aspecto del Overdrive y del Overdrive Completo (cuernos incluidos), el brillo de los golpes
+y el Ether Gear en el hombro se dibujan sobre su modelo y siguen sus animaciones en modo combate. Mientras suena la
+animación de una técnica, Epic Fight pasa un momento a modo normal y vuelve solo (igual que con Cursed Crown: Powers).
+Sus teclas (R, G, Alt, clics) no chocan con las del poder.
+
+En `runClient` Epic Fight se carga solo para probar (`dev_epicfight=false` en gradle.properties para quitarlo). Para
+probar también con Cursed Crown: Powers, pon su `.jar` como `libs/cursedpowers-dev.jar`.
+
 ## Técnicas
 
 | Lista | Tecla | ★ | Técnica | Qué hace |
