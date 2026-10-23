@@ -25,11 +25,14 @@ public final class PowerCapability {
 
     public static class Provider implements ICapabilitySerializable<CompoundTag> {
         private final PowerData data = new PowerData();
-        private final LazyOptional<PowerData> optional = LazyOptional.of(() -> data);
+        private LazyOptional<PowerData> optional = LazyOptional.of(() -> data);
 
         @Override
         public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-            return cap == POWER_DATA ? optional.cast() : LazyOptional.empty();
+            if (cap != POWER_DATA) return LazyOptional.empty();
+            // Si alguien lo invalidó (cambio de dimensión), se vuelve a crear: los datos siguen siendo los mismos
+            if (!optional.isPresent()) optional = LazyOptional.of(() -> data);
+            return optional.cast();
         }
 
         @Override public CompoundTag serializeNBT() { return data.save(); }

@@ -24,8 +24,9 @@ public final class CommonEvents {
     public static void attach(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof Player) {
             PowerCapability.Provider provider = new PowerCapability.Provider();
+            // Sin addListener(invalidate): al cambiar de dimensión Forge invalida las capabilities del jugador y las
+            // revive después, pero un LazyOptional invalidado no vuelve; el jugador se quedaba sin poderes.
             event.addCapability(PowerCapability.KEY, provider);
-            event.addListener(provider::invalidate);
         }
     }
 
