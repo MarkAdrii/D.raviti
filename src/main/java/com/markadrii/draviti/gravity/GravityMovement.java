@@ -41,6 +41,7 @@ public final class GravityMovement {
             }
             case MovePacket.EG_TALK -> com.markadrii.draviti.ethergear.EtherGear.talk(p);
             case MovePacket.EG_ENTER -> com.markadrii.draviti.ethergear.EtherGearInterior.enter(p);
+            case MovePacket.EG_BUY -> com.markadrii.draviti.ethergear.EtherGear.buy(p, (int) m.x());
             case MovePacket.EG_DIALOG -> com.markadrii.draviti.ethergear.EtherGearInterior.choose(p, (int) m.x());
             case MovePacket.TOGGLE_FLOAT -> PowerManager.onKey(p, Gravity.power().id(), "ingravidez", true);
             case MovePacket.SONIC_START -> {

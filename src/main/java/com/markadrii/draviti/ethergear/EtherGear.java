@@ -53,6 +53,49 @@ public final class EtherGear {
 
     public static int starsFor(String abilityId) { return STARS.getOrDefault(abilityId, 0); }
 
+    /** ¿Ya la puede usar? Estrella conseguida y, si pide alguna, pagada una vez (1 lingote de oro). */
+    public static boolean unlocked(PowerData d, String abilityId) {
+        int need = starsFor(abilityId);
+        return d.egStars >= need && (need == 0 || d.egBought.contains(abilityId));
+    }
+
+    /** Se puede pagar ya (tiene la estrella y aún no la ha comprado). */
+    public static boolean canBuy(PowerData d, String abilityId) {
+        int need = starsFor(abilityId);
+        return need > 0 && d.egStars >= need && !d.egBought.contains(abilityId);
+    }
+
+    /** Botón Desbloquear del menú: cobra 1 lingote de oro la primera vez. index = posición en el poder. */
+    public static void buy(ServerPlayer p, int index) {
+        PowerData d = Gravity.data(p);
+        Power pw = Gravity.power();
+        if (d == null || pw == null || !Gravity.has(p) || index < 0 || index >= pw.abilities().size()) return;
+        Ability a = pw.abilities().get(index);
+        if (!canBuy(d, a.id())) return;
+        if (!p.getAbilities().instabuild && !takeGold(p)) {
+            p.displayClientMessage(Component.translatable("message.draviti.eg.no_gold").withStyle(ChatFormatting.RED), true);
+            return;
+        }
+        d.egBought.add(a.id());
+        p.sendSystemMessage(Component.translatable("message.draviti.eg.bought", a.name()).withStyle(ChatFormatting.LIGHT_PURPLE));
+        Gravity.sound(p, p.position(), SoundEvents.AMETHYST_BLOCK_RESONATE, 1F, 1.2F);
+        Gravity.sound(p, p.position(), SoundEvents.PLAYER_LEVELUP, 0.6F, 1.4F);
+        Gravity.fxOn(p, Fx.WEIGHTLESS, p, p.getBbHeight(), 20);
+        PowerManager.sync(p);
+    }
+
+    private static boolean takeGold(ServerPlayer p) {
+        var inv = p.getInventory();
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            var stack = inv.getItem(i);
+            if (stack.is(net.minecraft.world.item.Items.GOLD_INGOT)) {
+                stack.shrink(1);
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static int affinityMax(int stars) { return AFFINITY_MAX[Math.max(0, Math.min(MAX_STARS, stars))]; }
 
     /** Éter extra por estrellas (se suma al máximo de la barra). */

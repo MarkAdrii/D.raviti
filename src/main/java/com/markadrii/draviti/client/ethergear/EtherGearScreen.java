@@ -108,6 +108,9 @@ public class EtherGearScreen extends Screen {
         g.fill(x0, y0, x0 + w, y0 + h, BG);
         drawHeader(g, d);
         info = Info.BOND;
+        lastMouseX = mouseX; lastMouseY = mouseY;
+        buyTip = false;
+        buyBtn = null;
         if (abilitiesPage) {
             drawAbilityList(g, d, mouseX, mouseY);
             drawAbilityDetail(g, d);
@@ -118,6 +121,7 @@ public class EtherGearScreen extends Screen {
         }
         drawRight(g, partialTick);
         drawFooter(g, d, mouseX, mouseY);
+        if (buyTip) g.renderTooltip(font, Component.translatable("screen.draviti.eg.tip.no_gold"), mouseX, mouseY);
         super.render(g, mouseX, mouseY, partialTick);
     }
 
@@ -260,7 +264,7 @@ public class EtherGearScreen extends Screen {
         panel(g, lx, top, lw, bottom - top);
         int x = lx + 6, bw = lw - 12, y = top + 6;
         Power pw = Gravity.power();
-        long unlocked = abilities.stream().filter(a -> EtherGear.starsFor(a.id()) <= d.egStars).count();
+        long unlocked = abilities.stream().filter(a -> EtherGear.unlocked(d, a.id())).count();
         g.drawString(font, Component.translatable("screen.draviti.eg.abilities", unlocked, abilities.size()), x, y, ACCENT, false);
         int rows = visibleRows();
         scroll = Math.max(0, Math.min(scroll, abilities.size() - rows));
@@ -269,7 +273,8 @@ public class EtherGearScreen extends Screen {
             int i = k + scroll;
             Ability a = abilities.get(i);
             int need = EtherGear.starsFor(a.id());
-            boolean open = need <= d.egStars;
+            boolean open = EtherGear.unlocked(d, a.id());
+            boolean buyable = EtherGear.canBuy(d, a.id());
             boolean sel = i == selected, hov = hover(mouseX, mouseY, x, y, bw, ROW - 2);
             g.fill(x, y, x + bw, y + ROW - 2, sel ? HEADER : hov ? 0xFF3A2752 : PANEL_L);
             outline(g, x, y, bw, ROW - 2, BORDER);
@@ -277,10 +282,18 @@ public class EtherGearScreen extends Screen {
             AbilityBarOverlay.drawIcon(g, a.icon(), x, y - 1);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             Component name = a.name();
-            int maxName = bw - 22 - need * 8 - 4;
+            int maxName = bw - 22 - need * 8 - 4 - (buyable ? 10 : 0);
             String txt = font.plainSubstrByWidth(name.getString(), maxName);
             g.drawString(font, txt, x + 19, y + 4, sel ? 0xFFFFFFFF : open ? TEXT : MUTED, false);
-            for (int s = 0; s < need; s++) star(g, x + bw - 3 - (need - s) * 8, y + 4, open ? STAR_ON : STAR_OFF);
+            for (int s = 0; s < need; s++) star(g, x + bw - 3 - (need - s) * 8, y + 4, d.egStars >= need ? STAR_ON : STAR_OFF);
+            // Ya tiene la estrella pero falta pagar: lingote de oro pequeñito
+            if (buyable) {
+                g.pose().pushPose();
+                g.pose().translate(x + bw - 3 - need * 8 - 11, y + 2, 0);
+                g.pose().scale(0.6F, 0.6F, 1F);
+                g.renderItem(GOLD, 0, 0);
+                g.pose().popPose();
+            }
             y += ROW;
         }
         // Barra de desplazamiento
@@ -291,6 +304,16 @@ public class EtherGearScreen extends Screen {
             g.fill(lx + lw - 4, ty, lx + lw - 2, ty + th, ACCENT);
         }
         if (pw == null) return;
+    }
+
+    private static final net.minecraft.world.item.ItemStack GOLD = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.GOLD_INGOT);
+    private int[] buyBtn;
+    private boolean buyTip;
+    private int lastMouseX, lastMouseY;
+
+    private static boolean hasGold() {
+        var p = Minecraft.getInstance().player;
+        return p != null && (p.getAbilities().instabuild || p.getInventory().contains(GOLD));
     }
 
     private void drawAbilityDetail(GuiGraphics g, PowerData d) {
@@ -304,18 +327,47 @@ public class EtherGearScreen extends Screen {
         g.drawString(font, kind, x, y, MUTED, false);
         y += 12;
 
-        // Lo que pide: la estrella y si ya la tienes
+        // Lo que pide: 1) la estrella y 2) la primera vez, un lingote de oro
         int need = EtherGear.starsFor(a.id());
-        boolean open = need <= d.egStars;
-        Component req = need == 0 ? Component.translatable("screen.draviti.eg.req.none")
-                : Component.translatable("screen.draviti.eg.req", "★".repeat(need));
-        g.drawString(font, req, x, y, TEXT, false);
-        y += 10;
-        Component status = open ? Component.translatable("screen.draviti.eg.req.ok")
-                : Component.translatable("screen.draviti.eg.req.missing", need - d.egStars);
-        for (FormattedCharSequence line : font.split(status, bw)) {
-            g.drawString(font, line, x, y, open ? OK : NO, false);
-            y += 9;
+        buyBtn = null;
+        if (need == 0) {
+            g.drawString(font, Component.translatable("screen.draviti.eg.req.none"), x, y, OK, false);
+            y += 10;
+        } else {
+            boolean hasStar = d.egStars >= need;
+            boolean paid = d.egBought.contains(a.id());
+            Component starLine = Component.literal(hasStar ? "✔ " : "✖ ")
+                    .append(Component.translatable("screen.draviti.eg.req.star", "★".repeat(need)));
+            g.drawString(font, starLine, x, y, hasStar ? OK : NO, false);
+            if (!hasStar) {
+                Component miss = Component.translatable("screen.draviti.eg.req.missing", need - d.egStars);
+                g.drawString(font, miss, x + bw - font.width(miss), y, MUTED, false);
+            }
+            y += 10;
+            Component goldLine = Component.literal(paid ? "✔ " : "✖ ")
+                    .append(Component.translatable(paid ? "screen.draviti.eg.req.paid" : "screen.draviti.eg.req.gold"));
+            g.drawString(font, goldLine, x, y, paid ? OK : NO, false);
+            g.pose().pushPose();
+            g.pose().translate(x + font.width(goldLine) + 2, y - 2, 0);
+            g.pose().scale(0.7F, 0.7F, 1F);
+            g.renderItem(GOLD, 0, 0);
+            g.pose().popPose();
+            y += 12;
+            if (EtherGear.canBuy(d, a.id())) {
+                Component label = Component.translatable("screen.draviti.eg.buy");
+                int bwid = Math.min(bw, font.width(label) + 16);
+                buyBtn = new int[]{x, y, bwid, 16};
+                boolean afford = hasGold();
+                if (afford) {
+                    button(g, buyBtn, label, lastMouseX, lastMouseY);
+                } else {
+                    g.fill(x - 1, y - 1, x + bwid + 1, y + 17, BORDER);
+                    g.fill(x, y, x + bwid, y + 16, 0xFF3A3346);
+                    g.drawString(font, label, x + bwid / 2 - font.width(label) / 2, y + 4, 0xFF8A809A, false);
+                    if (hover(lastMouseX, lastMouseY, x, y, bwid, 16)) buyTip = true;
+                }
+                y += 20;
+            }
         }
         if (a.requires() != null) {
             Power pw = Gravity.power();
@@ -484,6 +536,16 @@ public class EtherGearScreen extends Screen {
                         return true;
                     }
                 }
+            }
+            if (abilitiesPage && buyBtn != null && hasGold() && hover(mouseX, mouseY, buyBtn[0], buyBtn[1], buyBtn[2], buyBtn[3])
+                    && selected < abilities.size()) {
+                Power pw = Gravity.power();
+                int index = pw == null ? -1 : pw.abilities().indexOf(abilities.get(selected));
+                if (index >= 0) {
+                    Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.AMETHYST_BLOCK_CHIME, 1F));
+                    ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_BUY, index, 0));
+                }
+                return true;
             }
             int[] c = closeBtn();
             if (hover(mouseX, mouseY, c[0], c[1], c[2], c[3])) {

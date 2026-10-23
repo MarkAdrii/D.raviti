@@ -28,6 +28,7 @@ import java.util.Collection;
  * /draviti lista [jugador]
  * /draviti estrellas &lt;jugadores&gt; &lt;0-5&gt; [afinidad] — estrellas del Ether Gear.
  * /draviti afinidad &lt;jugadores&gt; &lt;valor&gt; — suma afinidad con el Ether Gear.
+ * /draviti desbloquear &lt;jugadores&gt; — da por pagadas todas las técnicas (siguen pidiendo su estrella).
  * /draviti esperas &lt;jugadores&gt; — se puede volver a hablar con él y entrar en su interior ya.
  */
 public final class DravitiCommand {
@@ -76,6 +77,9 @@ public final class DravitiCommand {
                         .then(Commands.argument("jugadores", EntityArgument.players())
                                 .then(Commands.argument("valor", IntegerArgumentType.integer(1, 100000))
                                         .executes(DravitiCommand::affinity))))
+                .then(Commands.literal("desbloquear")
+                        .then(Commands.argument("jugadores", EntityArgument.players())
+                                .executes(DravitiCommand::unlockAll)))
                 .then(Commands.literal("esperas")
                         .then(Commands.argument("jugadores", EntityArgument.players())
                                 .executes(DravitiCommand::resetWaits)))
@@ -146,6 +150,19 @@ public final class DravitiCommand {
         for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores"))
             com.markadrii.draviti.ethergear.EtherGear.addAffinity(p, v, "message.draviti.eg.reason.command");
         c.getSource().sendSuccess(() -> Component.translatable("command.draviti.affinity", v), true);
+        return 1;
+    }
+
+    /** Marca como pagadas todas las técnicas (siguen pidiendo su estrella). */
+    private static int unlockAll(CommandContext<CommandSourceStack> c) throws CommandSyntaxException {
+        Power pw = Gravity.power();
+        for (ServerPlayer p : EntityArgument.getPlayers(c, "jugadores")) {
+            var d = PowerCapability.get(p).orElse(null);
+            if (d == null || pw == null) continue;
+            for (var a : pw.abilities()) d.egBought.add(a.id());
+            PowerManager.sync(p);
+        }
+        c.getSource().sendSuccess(() -> Component.translatable("command.draviti.unlocked"), true);
         return 1;
     }
 

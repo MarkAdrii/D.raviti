@@ -42,6 +42,8 @@ public class PowerData {
     public String egReturnDim = "";
     public double egRx, egRy, egRz;
     public float egRyaw;
+    /** Técnicas ya pagadas (1 lingote de oro la primera vez). */
+    public final Set<String> egBought = new java.util.HashSet<>();
     /** Respuestas ya usadas en esta visita (bits). */
     public int egVisit;
 
@@ -71,7 +73,7 @@ public class PowerData {
     public boolean isUnlocked(Power power, Ability ability) {
         // Estrellas del Ether Gear
         if (power.id().equals(com.markadrii.draviti.gravity.Gravity.POWER_ID)
-                && egStars < com.markadrii.draviti.ethergear.EtherGear.starsFor(ability.id())) return false;
+                && !com.markadrii.draviti.ethergear.EtherGear.unlocked(this, ability.id())) return false;
         if (ability.requires() == null) return true;
         return power.ability(ability.requires()).map(r -> state(power, r).enabled).orElse(true);
     }
@@ -108,6 +110,7 @@ public class PowerData {
         egTalkDay = other.egTalkDay; egEnterDay = other.egEnterDay; egDay = other.egDay;
         egInside = other.egInside; egReturnDim = other.egReturnDim;
         egRx = other.egRx; egRy = other.egRy; egRz = other.egRz; egRyaw = other.egRyaw; egVisit = other.egVisit;
+        egBought.clear(); egBought.addAll(other.egBought);
     }
 
     // ---- NBT ----
@@ -144,6 +147,9 @@ public class PowerData {
         eg.putBoolean("Inside", egInside);
         eg.putString("ReturnDim", egReturnDim);
         eg.putDouble("Rx", egRx); eg.putDouble("Ry", egRy); eg.putDouble("Rz", egRz); eg.putFloat("Ryaw", egRyaw);
+        ListTag bought = new ListTag();
+        for (String id : egBought) bought.add(StringTag.valueOf(id));
+        eg.put("Bought", bought);
         tag.put("EtherGear", eg);
         return tag;
     }
@@ -184,6 +190,9 @@ public class PowerData {
         egInside = eg.getBoolean("Inside");
         egReturnDim = eg.getString("ReturnDim");
         egRx = eg.getDouble("Rx"); egRy = eg.getDouble("Ry"); egRz = eg.getDouble("Rz"); egRyaw = eg.getFloat("Ryaw");
+        egBought.clear();
+        ListTag bought = eg.getList("Bought", Tag.TAG_STRING);
+        for (int i = 0; i < bought.size(); i++) egBought.add(bought.getString(i));
     }
 
     // ---- Red ----
@@ -208,6 +217,8 @@ public class PowerData {
         buf.writeLong(egTalkDay);
         buf.writeLong(egEnterDay);
         buf.writeBoolean(egInside);
+        buf.writeVarInt(egBought.size());
+        for (String id : egBought) buf.writeUtf(id);
     }
 
     public static PowerData read(FriendlyByteBuf buf) {
@@ -234,6 +245,8 @@ public class PowerData {
         d.egTalkDay = buf.readLong();
         d.egEnterDay = buf.readLong();
         d.egInside = buf.readBoolean();
+        int nb = buf.readVarInt();
+        for (int i = 0; i < nb; i++) d.egBought.add(buf.readUtf());
         return d;
     }
 }
