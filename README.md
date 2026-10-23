@@ -52,26 +52,26 @@ D.raviti no necesita Cursed Crown, pero si está instalado:
 
 ## Técnicas
 
-| Lista | Tecla | Técnica | Qué hace |
-|---|---|---|---|
-| 1 | V | Gravity Swap | Lo que miras (un bloque o una dirección) pasa a ser tu suelo: caes hacia ahí, la cámara gira y andas por paredes y techos. Otra vez mirando a la misma superficie o al suelo = gravedad normal |
-| 1 | B | Puño Gravitatorio (Jūken) | El brazo brilla y el puñetazo lanza a todos los de delante y revienta el suelo |
-| 1 | N | Cañón Gravitatorio (Jūdan) | Forma una esfera de gravedad en el puño y la lanza; su peso empuja al objetivo |
-| 1 | M | Onda Gravitatoria (Jūryokuha) | Palma en el suelo: una espiral atrae hacia ti a todos (y los objetos) |
-| 1 | , | Centro de Gravedad (Jūshin) | Al que miras le sube la gravedad y se estrella contra el suelo |
-| 2 | V | Ráfaga de Puños (Jūken Ranbu) | Mantén: lluvia de puñetazos y un golpe final que los manda lejos |
-| 2 | B | Patada Molinete (Jūsen Kyaku) | Patada giratoria en el aire que barre todo alrededor |
-| 2 | N | Cometa Gravitatorio (Jūsuisei) | Salto enorme y caída con los pies cargados de gravedad |
-| 2 | M | Placaje Gravitatorio | Vuelas hacia el objetivo y lo clavas en el suelo de una patada |
-| 2 | , | Impacto Gravitatorio | Convierte la energía cinética absorbida en un puñetazo hacia abajo (más energía, más grande) |
-| 3 | V | Campo Gravitatorio (Jūryokuba) | 10 s: una esfera semitransparente cubre la zona; los de dentro quedan aplastados y los ataques caen al suelo |
-| 3 | B | Antigravedad (Hanjūryoku) | Desvía flechas y proyectiles; lo que tocas o te toca sale despedido |
-| 3 | N | Peso Infernal | Aumenta el peso de todos los de alrededor sin tocarlos (no pueden saltar ni volar) |
-| 3 | M | Ingravidez Ajena | El objetivo pierde su peso y flota sin control |
-| 3 | , | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
-| 4 | V | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
-| 4 | B | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
-| 4 | N | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
+| Lista | Tecla | ★ | Técnica | Qué hace |
+|---|---|---|---|---|
+| 1 | V | - | Puño Gravitatorio (Jūken) | El brazo brilla y el puñetazo lanza a todos los de delante y revienta el suelo |
+| 1 | B | - | Cañón Gravitatorio (Jūdan) | Forma una esfera de gravedad en el puño y la lanza; su peso empuja al objetivo |
+| 1 | N | - | Antigravedad (Hanjūryoku) | Desvía flechas y proyectiles; lo que tocas o te toca sale despedido |
+| 1 | M | 1 | Gravity Swap | Lo que miras (un bloque o una dirección) pasa a ser tu suelo: caes hacia ahí, la cámara gira y andas por paredes y techos. Otra vez mirando a la misma superficie o al suelo = gravedad normal |
+| 1 | , | 1 | Onda Gravitatoria (Jūryokuha) | Palma en el suelo: una espiral atrae hacia ti a todos (y los objetos) |
+| 2 | V | 1 | Ráfaga de Puños (Jūken Ranbu) | Mantén: lluvia de puñetazos y un golpe final que los manda lejos |
+| 2 | B | 1 | Patada Molinete (Jūsen Kyaku) | Patada giratoria en el aire que barre todo alrededor |
+| 2 | N | 2 | Centro de Gravedad (Jūshin) | Al que miras le sube la gravedad y se estrella contra el suelo |
+| 2 | M | 2 | Cometa Gravitatorio (Jūsuisei) | Salto enorme y caída con los pies cargados de gravedad |
+| 2 | , | 2 | Placaje Gravitatorio | Vuelas hacia el objetivo y lo clavas en el suelo de una patada |
+| 3 | V | 2 | Overdrive | Pelo y piel más claros, marcas de éter y cuernos de energía. Más fuerza, velocidad y aguante; técnicas x1,6 |
+| 3 | B | 2 | Ingravidez Ajena | El objetivo pierde su peso y flota sin control |
+| 3 | N | 3 | Impacto Gravitatorio | Convierte la energía cinética absorbida en un puñetazo hacia abajo (más energía, más grande) |
+| 3 | M | 3 | Peso Infernal | Aumenta el peso de todos los de alrededor sin tocarlos (no pueden saltar ni volar) |
+| 3 | , | 3 | Campo Gravitatorio (Jūryokuba) | 10 s: una esfera semitransparente cubre la zona; los de dentro quedan aplastados y los ataques caen al suelo |
+| 4 | V | 4 | Meteor Breaker | Mantén para cargar el puño; al soltar sale un meteoro de gravedad |
+| 4 | B | 4 | Cielo Negro (Kokuten) | Técnica definitiva (éter lleno): una bola de gravedad que crece y lo aplasta todo |
+| 4 | N | 5 | Overdrive Completo | (con Overdrive) Brazos y piernas oscuros con marcas moradas, detalles en pecho y espalda, cuernos negros. Agujero negro que lo atrae todo; técnicas x2,4 |
 
 ### Gravity Swap y Gravity Control
 

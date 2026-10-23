@@ -84,7 +84,9 @@ public class EtherGearScreen extends Screen {
         abilities = new ArrayList<>();
         if (pw != null)
             for (Ability a : pw.abilities()) if (!a.id().equals("pasivas")) abilities.add(a);
-        abilities.sort(Comparator.comparingInt(a -> EtherGear.starsFor(a.id())));
+        // Por estrellas y, dentro de cada estrella, en el orden de la barra
+        abilities.sort(Comparator.<Ability>comparingInt(a -> EtherGear.starsFor(a.id()))
+                .thenComparingInt(a -> a.listIndex() < 0 ? 99 : a.listIndex()));
     }
 
     @Override public boolean isPauseScreen() { return false; }
@@ -339,26 +341,32 @@ public class EtherGearScreen extends Screen {
             Component starLine = Component.literal(hasStar ? "✔ " : "✖ ")
                     .append(Component.translatable("screen.draviti.eg.req.star", "★".repeat(need)));
             g.drawString(font, starLine, x, y, hasStar ? OK : NO, false);
-            if (!hasStar) {
-                Component miss = Component.translatable("screen.draviti.eg.req.missing", need - d.egStars);
-                g.drawString(font, miss, x + bw - font.width(miss), y, MUTED, false);
-            }
             y += 10;
+            if (!hasStar) {
+                // En su propia línea (antes se montaba encima)
+                Component miss = Component.translatable("screen.draviti.eg.req.missing", need - d.egStars);
+                for (FormattedCharSequence line : font.split(miss, bw - 10)) {
+                    g.drawString(font, line, x + 10, y, MUTED, false);
+                    y += 9;
+                }
+                y += 1;
+            }
             EtherGear.Cost cost = EtherGear.costFor(a.id());
             boolean ok2 = paid || cost.free();
             Component goldLine = Component.literal(ok2 ? "✔ " : "✖ ").append(paid ? Component.translatable("screen.draviti.eg.req.paid")
                     : cost.free() ? Component.translatable("screen.draviti.eg.req.free")
                     : Component.translatable("screen.draviti.eg.req.gold", cost.count(), cost.item().getDescription()));
-            for (FormattedCharSequence line : font.split(goldLine, bw - 14)) {
-                g.drawString(font, line, x, y, ok2 ? OK : NO, false);
-                y += 9;
-            }
-            if (!cost.free()) {
+            // El objeto a la derecha de la primera línea; el texto se corta antes para no pisarlo
+            if (!cost.free() && !paid) {
                 g.pose().pushPose();
-                g.pose().translate(x + bw - 12, y - 11, 0);
+                g.pose().translate(x + bw - 11, y - 2, 0);
                 g.pose().scale(0.7F, 0.7F, 1F);
                 g.renderItem(cost.stack(), 0, 0);
                 g.pose().popPose();
+            }
+            for (FormattedCharSequence line : font.split(goldLine, bw - 14)) {
+                g.drawString(font, line, x, y, ok2 ? OK : NO, false);
+                y += 9;
             }
             y += 3;
             y += 12;
