@@ -32,27 +32,22 @@ public class GlowLimbLayer extends RenderLayer<AbstractClientPlayer, PlayerModel
     @Override
     public void render(PoseStack pose, MultiBufferSource buffer, int light, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float age, float headYaw, float headPitch) {
+        draw(new PlayerBody.Vanilla(getParentModel()), pose, buffer, player, age);
+    }
+
+    /** Brillo de los miembros que golpean (vale para el modelo normal y el de Epic Fight). */
+    public static void draw(PlayerBody body, PoseStack pose, MultiBufferSource buffer, AbstractClientPlayer player, float age) {
         if (player.isInvisible()) return;
         float r = ClientVisuals.glow(player, Limb.RIGHT_ARM), l = ClientVisuals.glow(player, Limb.LEFT_ARM);
         float leg = ClientVisuals.glow(player, Limb.RIGHT_LEG);
         if (r <= 0 && l <= 0 && leg <= 0) return;
-        PlayerModel<AbstractClientPlayer> m = getParentModel();
-        VertexConsumer vc = buffer.getBuffer(RenderType.eyes(texture(player)));
+        RenderType type = RenderType.eyes(texture(player));
         float pulse = 0.75F + 0.25F * Mth.sin(age * 0.8F);
-        if (r > 0) {
-            float k = r * pulse;
-            m.rightArm.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-            m.rightSleeve.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-        }
-        if (l > 0) {
-            float k = l * pulse;
-            m.leftArm.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-            m.leftSleeve.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-        }
-        if (leg > 0) {
-            float k = leg * pulse;
-            m.rightLeg.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-            m.rightPants.render(pose, vc, 0xF000F0, OverlayTexture.NO_OVERLAY, k, k, k, 1);
-        }
+        if (r > 0) body.draw(pose, buffer, type, 0xF000F0, OverlayTexture.NO_OVERLAY, r * pulse, r * pulse, r * pulse, 1,
+                PlayerBody.Part.RIGHT_ARM, PlayerBody.Part.RIGHT_SLEEVE);
+        if (l > 0) body.draw(pose, buffer, type, 0xF000F0, OverlayTexture.NO_OVERLAY, l * pulse, l * pulse, l * pulse, 1,
+                PlayerBody.Part.LEFT_ARM, PlayerBody.Part.LEFT_SLEEVE);
+        if (leg > 0) body.draw(pose, buffer, type, 0xF000F0, OverlayTexture.NO_OVERLAY, leg * pulse, leg * pulse, leg * pulse, 1,
+                PlayerBody.Part.RIGHT_LEG, PlayerBody.Part.RIGHT_PANTS);
     }
 }

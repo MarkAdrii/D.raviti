@@ -74,6 +74,18 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
 
+      # Cursed Crown: Powers (repo privado de RedneTwo): solo si hay un token con acceso en los secretos
+      # (CURSED_CROWN_TOKEN). Se compila para probarlo junto a D.raviti; el .jar no se sube a ningún sitio.
+      - name: Cursed Crown (opcional)
+        env:
+          TOKEN: ${{ secrets.CURSED_CROWN_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::notice::Sin CURSED_CROWN_TOKEN: se prueba sin Cursed Crown"; exit 0; fi
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/RedneTwo/Cursed-Crown.git" /tmp/cc
+          (cd /tmp/cc && chmod +x gradlew && ./gradlew :cursedpowers:jar --no-daemon -q)
+          mkdir -p libs && cp "$(ls /tmp/cc/cursedpowers/build/libs/*.jar | grep -v sources | head -1)" libs/cursedpowers-dev.jar
+          echo "::notice::Cursed Crown compilado para la prueba"
+
       - name: Servidor
         run: |
           chmod +x ./gradlew

@@ -80,8 +80,10 @@ repositories {
         name = "KosmX (Player Animator)"
         url = "https://maven.kosmx.dev/"
     }
+    // Cursed Crown: Powers compilado de su repo (solo para probar; la prueba de GitHub lo pone en libs/)
+    flatDir { dirs 'libs' }
     maven {
-        name = "CurseMaven (Photon y LDLib, solo para probar)"
+        name = "CurseMaven (Photon, LDLib y Epic Fight)"
         url = "https://cursemaven.com"
         content { includeGroup "curse.maven" }
     }
@@ -99,6 +101,16 @@ dependencies {
     implementation fg.deobf("team.lodestar.lodestone:lodestone:${lodestone_version}", { transitive = false })
     // Animaciones del jugador
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${player_anim_version}")
+
+    // Epic Fight (opcional): se compila contra él para la compatibilidad; en runClient se carga si dev_epicfight=true
+    compileOnly fg.deobf("curse.maven:epic-fight-mod-405076:${epicfight_file}")
+    if (project.findProperty('dev_epicfight') == 'true') {
+        runtimeOnly fg.deobf("curse.maven:epic-fight-mod-405076:${epicfight_file}")
+    }
+    // Cursed Crown: Powers (el mod de RedneTwo) para probar los dos juntos: si está libs/cursedpowers-dev.jar
+    if (file('libs/cursedpowers-dev.jar').exists()) {
+        runtimeOnly fg.deobf("blank:cursedpowers:dev")
+    }
 
     // Photon (opcional): solo en runClient para ver sus efectos. No va dentro del .jar ni hace falta para jugar.
     // Para probar sin Photon pon dev_photon=false en gradle.properties.

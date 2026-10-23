@@ -41,55 +41,49 @@ public class OverdriveLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
     @Override
     public void render(PoseStack pose, MultiBufferSource buffer, int light, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float age, float headYaw, float headPitch) {
+        draw(new PlayerBody.Vanilla(getParentModel()), pose, buffer, light, LivingEntityRenderer.getOverlayCoords(player, 0.0F),
+                player, partialTick, age);
+    }
+
+    /** Aspecto del Overdrive (vale para el modelo normal y el de Epic Fight). */
+    public static void draw(PlayerBody body, PoseStack pose, MultiBufferSource buffer, int light, int overlay,
+                            AbstractClientPlayer player, float partialTick, float age) {
         if (player.isInvisible()) return;
         boolean full = Gravity.fullOverdrive(player);
         if (!full && !Gravity.overdrive(player)) return;
-        PlayerModel<AbstractClientPlayer> m = getParentModel();
-        int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
         // Al transformarse aparece poco a poco
         String key = Gravity.POWER_ID + "/" + (full ? "overdrive_completo" : "overdrive");
         // El aspecto aparece de golpe al final de la transformación (cuando estalla)
         int start = com.markadrii.draviti.gravity.GravityAbilities.transformTicks(full) - 3;
         float in = Mth.clamp((ClientVisuals.activeTicks(player, key) - start + partialTick) / 5F, 0, 1);
         if (in <= 0 && !full) return;
-        if (full && in <= 0) { key = Gravity.POWER_ID + "/overdrive"; full = false; in = 1; }
+        if (full && in <= 0) { full = false; in = 1; }
         float pulse = 0.8F + 0.2F * Mth.sin(age * 0.15F);
+        PlayerBody.Part[] limbs = {PlayerBody.Part.RIGHT_ARM, PlayerBody.Part.LEFT_ARM, PlayerBody.Part.RIGHT_LEG, PlayerBody.Part.LEFT_LEG};
 
         if (!full) {
             // Piel y pelo más claros: la propia skin otra vez, sumada (solo las partes de dentro)
-            boolean hat = m.hat.visible, jacket = m.jacket.visible, ls = m.leftSleeve.visible, rs = m.rightSleeve.visible,
-                    lp = m.leftPants.visible, rp = m.rightPants.visible;
-            m.hat.visible = m.jacket.visible = m.leftSleeve.visible = m.rightSleeve.visible = m.leftPants.visible = m.rightPants.visible = false;
-            VertexConsumer lighten = buffer.getBuffer(RenderType.eyes(player.getSkinTextureLocation()));
             float k = 0.16F * in;
-            m.renderToBuffer(pose, lighten, 0xF000F0, overlay, k, k, k * 1.05F, 1);
-            m.hat.visible = hat; m.jacket.visible = jacket; m.leftSleeve.visible = ls; m.rightSleeve.visible = rs;
-            m.leftPants.visible = lp; m.rightPants.visible = rp;
-
-            VertexConsumer marks = buffer.getBuffer(RenderType.eyes(MARKINGS));
+            body.draw(pose, buffer, RenderType.eyes(player.getSkinTextureLocation()), 0xF000F0, overlay, k, k, k * 1.05F, 1,
+                    PlayerBody.ALL_INNER);
             float mk = in * pulse * 0.55F;
-            m.renderToBuffer(pose, marks, 0xF000F0, overlay, mk, mk, mk, 1);
+            body.draw(pose, buffer, RenderType.eyes(MARKINGS), 0xF000F0, overlay, mk, mk, mk, 1, PlayerBody.ALL);
         } else {
             // Brazos y piernas oscurecidos con marcas moradas
-            VertexConsumer dark = buffer.getBuffer(RenderType.entityTranslucentCull(ARMS));
-            for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightSleeve, m.leftSleeve,
-                    m.rightLeg, m.leftLeg, m.rightPants, m.leftPants})
-                part.render(pose, dark, light, overlay, 1, 1, 1, in);
-            VertexConsumer glow = buffer.getBuffer(RenderType.eyes(ARMS_GLOW));
+            body.draw(pose, buffer, RenderType.entityTranslucentCull(ARMS), light, overlay, 1, 1, 1, in,
+                    PlayerBody.Part.RIGHT_ARM, PlayerBody.Part.LEFT_ARM, PlayerBody.Part.RIGHT_SLEEVE, PlayerBody.Part.LEFT_SLEEVE,
+                    PlayerBody.Part.RIGHT_LEG, PlayerBody.Part.LEFT_LEG, PlayerBody.Part.RIGHT_PANTS, PlayerBody.Part.LEFT_PANTS);
             float gk = in * pulse * 0.7F;
-            for (var part : new net.minecraft.client.model.geom.ModelPart[]{m.rightArm, m.leftArm, m.rightLeg, m.leftLeg})
-                part.render(pose, glow, 0xF000F0, overlay, gk, gk, gk, 1);
+            body.draw(pose, buffer, RenderType.eyes(ARMS_GLOW), 0xF000F0, overlay, gk, gk, gk, 1, limbs);
             // Detalles en pecho y espalda (el centro del pecho queda al aire)
-            VertexConsumer torso = buffer.getBuffer(RenderType.entityTranslucentCull(TORSO));
-            m.body.render(pose, torso, light, overlay, 1, 1, 1, in);
-            m.jacket.render(pose, torso, light, overlay, 1, 1, 1, in);
-            VertexConsumer torsoGlow = buffer.getBuffer(RenderType.eyes(TORSO_GLOW));
-            m.body.render(pose, torsoGlow, 0xF000F0, overlay, gk, gk, gk, 1);
+            body.draw(pose, buffer, RenderType.entityTranslucentCull(TORSO), light, overlay, 1, 1, 1, in,
+                    PlayerBody.Part.BODY, PlayerBody.Part.JACKET);
+            body.draw(pose, buffer, RenderType.eyes(TORSO_GLOW), 0xF000F0, overlay, gk, gk, gk, 1, PlayerBody.Part.BODY);
         }
 
         // Cuernos (siguen a la cabeza)
         pose.pushPose();
-        m.head.translateAndRotate(pose);
+        body.toHead(pose);
         float s = 0.4F + 0.6F * in;
         pose.translate(0, -0.25F * (1 - s), 0);
         pose.scale(s, s, s);

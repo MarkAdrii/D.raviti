@@ -30,6 +30,12 @@ public final class GravityAnimations {
         return raw instanceof ModifierLayer<?> l ? (ModifierLayer<IAnimation>) l : null;
     }
 
+    /** Hay una animación nuestra en marcha (Epic Fight pasa a modo normal mientras tanto). */
+    public static boolean animating(AbstractClientPlayer player) {
+        ModifierLayer<IAnimation> layer = layer(player);
+        return layer != null && layer.getAnimation() != null && layer.getAnimation().isActive();
+    }
+
     public static void play(AbstractClientPlayer player, String name) {
         ModifierLayer<IAnimation> layer = layer(player);
         if (layer == null) return;

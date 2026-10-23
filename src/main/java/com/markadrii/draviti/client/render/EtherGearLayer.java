@@ -37,24 +37,29 @@ public class EtherGearLayer extends RenderLayer<AbstractClientPlayer, PlayerMode
                        float limbSwing, float limbSwingAmount, float partialTick, float age, float headYaw, float headPitch) {
         // En el Overdrive completo el brazo se oscurece y la marca queda debajo
         if (player.isInvisible() || !hasPower(player) || Gravity.fullOverdrive(player)) return;
-        PlayerModel<AbstractClientPlayer> m = getParentModel();
         int overlay = LivingEntityRenderer.getOverlayCoords(player, 0.0F);
-        renderPart(pose, buffer, light, overlay, m.rightArm);
-    }
-
-    static void renderArm(PoseStack pose, MultiBufferSource buffer, int light, ModelPart arm) {
-        renderPart(pose, buffer, light, OverlayTexture.NO_OVERLAY, arm);
-    }
-
-    private static void renderPart(PoseStack pose, MultiBufferSource buffer, int light, int overlay, ModelPart arm) {
+        PlayerModel<AbstractClientPlayer> m = getParentModel();
         // Un pelín más grande que el brazo para que no parpadee con la skin
+        float x = m.rightArm.xScale, y = m.rightArm.yScale, z = m.rightArm.zScale;
+        m.rightArm.xScale = x * 1.01F; m.rightArm.yScale = y * 1.005F; m.rightArm.zScale = z * 1.01F;
+        draw(new PlayerBody.Vanilla(m), pose, buffer, light, overlay, player);
+        m.rightArm.xScale = x; m.rightArm.yScale = y; m.rightArm.zScale = z;
+    }
+
+    /** La marca en el antebrazo derecho (vale para el modelo normal y el de Epic Fight). */
+    public static void draw(PlayerBody body, PoseStack pose, MultiBufferSource buffer, int light, int overlay, AbstractClientPlayer player) {
+        if (player.isInvisible() || !hasPower(player) || Gravity.fullOverdrive(player)) return;
+        body.draw(pose, buffer, RenderType.entityTranslucentCull(MARK), light, overlay, 1, 1, 1, 1, PlayerBody.Part.RIGHT_ARM);
+        // Brillo suave encima
+        body.draw(pose, buffer, RenderType.eyes(MARK), 0xF000F0, OverlayTexture.NO_OVERLAY, 0.35F, 0.35F, 0.35F, 1, PlayerBody.Part.RIGHT_ARM);
+    }
+
+    /** Brazo en primera persona (FirstPersonArms). */
+    static void renderArm(PoseStack pose, MultiBufferSource buffer, int light, ModelPart arm) {
         float x = arm.xScale, y = arm.yScale, z = arm.zScale;
         arm.xScale = x * 1.01F; arm.yScale = y * 1.005F; arm.zScale = z * 1.01F;
-        VertexConsumer vc = buffer.getBuffer(RenderType.entityTranslucentCull(MARK));
-        arm.render(pose, vc, light, overlay, 1, 1, 1, 1);
-        // Brillo suave encima
-        VertexConsumer glow = buffer.getBuffer(RenderType.eyes(MARK));
-        arm.render(pose, glow, 0xF000F0, OverlayTexture.NO_OVERLAY, 0.35F, 0.35F, 0.35F, 1);
+        arm.render(pose, buffer.getBuffer(RenderType.entityTranslucentCull(MARK)), light, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        arm.render(pose, buffer.getBuffer(RenderType.eyes(MARK)), 0xF000F0, OverlayTexture.NO_OVERLAY, 0.35F, 0.35F, 0.35F, 1);
         arm.xScale = x; arm.yScale = y; arm.zScale = z;
     }
 }

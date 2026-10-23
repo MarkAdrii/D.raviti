@@ -148,7 +148,33 @@ public final class PlayTest {
             }
             case 520 -> { mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT); state(mc, "prestamo"); }
             case 540 -> shot(mc, "08_prestamo");
-            case 560 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
+            // ---- Epic Fight: modo combate con las capas del poder encima
+            case 570 -> {
+                if (net.minecraftforge.fml.ModList.get().isLoaded("epicfight"))
+                    com.markadrii.draviti.compat.epicfight.EpicFightCompat.testBattleMode(true);
+                else LOG.info("DRAVITI_PLAYTEST epicfight no instalado");
+            }
+            case 610 -> { state(mc, "ef_overdrive"); shot(mc, "09_ef_overdrive"); }
+            case 620 -> {
+                cmd(mc, "draviti estrellas @s 5");
+                server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "overdrive_completo", true));
+            }
+            case 700 -> { state(mc, "ef_completo"); shot(mc, "10_ef_completo"); }
+            case 705 -> mc.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+            case 712 -> shot(mc, "11_ef_completo_espalda");
+            case 720 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "puno_gravitatorio", true));
+            case 728 -> shot(mc, "12_ef_puno");
+            // ---- Cursed Crown: Powers (si está): teclas y barra compartidas
+            case 760 -> {
+                LOG.info("DRAVITI_PLAYTEST cursed instalado={} teclas_compartidas={}", CursedCompat.loaded(), CursedCompat.keysShared());
+                if (CursedCompat.loaded()) cmd(mc, "cursedpowers add @s cursedpowers:aqua");
+            }
+            case 800 -> {
+                LOG.info("DRAVITI_PLAYTEST cursed listas_suyas={} total={}", CursedCompat.theirListCount(), ClientEvents.totalLists());
+                mc.options.setCameraType(CameraType.FIRST_PERSON);
+            }
+            case 810 -> shot(mc, "13_barra");
+            case 830 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
             default -> {}
         }
     }

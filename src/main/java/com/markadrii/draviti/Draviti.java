@@ -28,6 +28,10 @@ public class Draviti {
         // Núcleo de gravedad de Gravity Control (Gravity Swap)
         com.markadrii.draviti.gravitycore.GravityCore.init(modBus);
         SmokeTest.init();
+        // Epic Fight (opcional): capas sobre su modelo y animaciones (solo en el cliente)
+        if (net.minecraftforge.fml.ModList.get().isLoaded("epicfight"))
+            net.minecraftforge.fml.DistExecutor.unsafeRunWhenOn(net.minecraftforge.api.distmarker.Dist.CLIENT,
+                    () -> () -> com.markadrii.draviti.compat.epicfight.EpicFightCompat.init(modBus));
 
         ModBlocks.BLOCKS.register(modBus);
         ModItems.ITEMS.register(modBus);
