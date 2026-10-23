@@ -61,6 +61,12 @@ public class EtherGearScreen extends Screen {
     private Info info = Info.BOND;
     private int infoTop;
 
+    /** Para la prueba automática: abre la página de habilidades con una elegida. */
+    public void testShowAbility(String id) {
+        abilitiesPage = true;
+        for (int i = 0; i < abilities.size(); i++) if (abilities.get(i).id().equals(id)) selected = i;
+    }
+
     public EtherGearScreen() {
         super(Component.translatable("screen.draviti.eg.title"));
     }

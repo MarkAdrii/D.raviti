@@ -100,6 +100,17 @@ jobs:
             echo "::error::El cliente no pasó la prueba"; exit 1; }
           echo "::notice::$(grep -ho 'DRAVITI_SMOKE_OK.*' client.log run/logs/latest.log | head -1)"
 
+      - name: Prueba de juego (capturas)
+        if: always()
+        run: |
+          export LIBGL_ALWAYS_SOFTWARE=1
+          printf "onboardAccessibility:false\nnarrator:0\nsoundDevice:\"\"\nrenderDistance:5\nsimulationDistance:5\nguiScale:2\n" > run/options.txt
+          timeout 1500 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClient --no-daemon \
+            -Pdraviti_jvm="-Ddraviti.playtest=true" 2>&1 | tee playtest.log || true
+          grep -h "DRAVITI_PLAYTEST" playtest.log | sed 's/.*DRAVITI_PLAYTEST/DRAVITI_PLAYTEST/' | head -40 \
+            | while IFS= read -r l; do echo "::notice title=juego::$l"; done
+          ls run/screenshots || true
+
       - name: Logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -108,5 +119,7 @@ jobs:
           path: |
             server.log
             client.log
+            playtest.log
             run/logs/
             run/crash-reports/
+            run/screenshots/
