@@ -42,6 +42,11 @@ public class PowerData {
     public String egReturnDim = "";
     public double egRx, egRy, egRz;
     public float egRyaw;
+    /** Préstamo de transformación del Ether Gear: ticks que quedan, forma (1 Overdrive, 2 Completo) y día en que se pidió. */
+    public int egBorrowTicks, egBorrowForm;
+    public long egBorrowDay = -100;
+    /** El Ether Gear está invocado fuera (y si va en el hombro). */
+    public boolean egSummoned, egShoulder;
     /** Técnicas ya pagadas (1 lingote de oro la primera vez). */
     public final Set<String> egBought = new java.util.HashSet<>();
     /** Respuestas ya usadas en esta visita (bits). */
@@ -73,7 +78,8 @@ public class PowerData {
     public boolean isUnlocked(Power power, Ability ability) {
         // Estrellas del Ether Gear
         if (power.id().equals(com.markadrii.draviti.gravity.Gravity.POWER_ID)
-                && !com.markadrii.draviti.ethergear.EtherGear.unlocked(this, ability.id())) return false;
+                && !com.markadrii.draviti.ethergear.EtherGear.unlocked(this, ability.id())
+                && !com.markadrii.draviti.ethergear.EtherGear.borrowed(this, ability.id())) return false;
         if (ability.requires() == null) return true;
         return power.ability(ability.requires()).map(r -> state(power, r).enabled).orElse(true);
     }
@@ -111,6 +117,8 @@ public class PowerData {
         egInside = other.egInside; egReturnDim = other.egReturnDim;
         egRx = other.egRx; egRy = other.egRy; egRz = other.egRz; egRyaw = other.egRyaw; egVisit = other.egVisit;
         egBought.clear(); egBought.addAll(other.egBought);
+        egBorrowTicks = other.egBorrowTicks; egBorrowForm = other.egBorrowForm; egBorrowDay = other.egBorrowDay;
+        egSummoned = other.egSummoned; egShoulder = other.egShoulder;
     }
 
     // ---- NBT ----
@@ -150,6 +158,11 @@ public class PowerData {
         ListTag bought = new ListTag();
         for (String id : egBought) bought.add(StringTag.valueOf(id));
         eg.put("Bought", bought);
+        eg.putInt("BorrowTicks", egBorrowTicks);
+        eg.putInt("BorrowForm", egBorrowForm);
+        eg.putLong("BorrowDay", egBorrowDay);
+        eg.putBoolean("Summoned", egSummoned);
+        eg.putBoolean("Shoulder", egShoulder);
         tag.put("EtherGear", eg);
         return tag;
     }
@@ -193,6 +206,11 @@ public class PowerData {
         egBought.clear();
         ListTag bought = eg.getList("Bought", Tag.TAG_STRING);
         for (int i = 0; i < bought.size(); i++) egBought.add(bought.getString(i));
+        egBorrowTicks = eg.getInt("BorrowTicks");
+        egBorrowForm = eg.getInt("BorrowForm");
+        egBorrowDay = eg.contains("BorrowDay") ? eg.getLong("BorrowDay") : -100;
+        egSummoned = eg.getBoolean("Summoned");
+        egShoulder = eg.getBoolean("Shoulder");
     }
 
     // ---- Red ----
@@ -222,6 +240,11 @@ public class PowerData {
             buf.writeUtf(com.markadrii.draviti.config.CommonConfig.unlockItem(s));
             buf.writeVarInt(com.markadrii.draviti.config.CommonConfig.unlockCount(s));
         }
+        buf.writeVarInt(egBorrowTicks);
+        buf.writeVarInt(egBorrowForm);
+        buf.writeLong(egBorrowDay);
+        buf.writeBoolean(egSummoned);
+        buf.writeBoolean(egShoulder);
         buf.writeVarInt(egBought.size());
         for (String id : egBought) buf.writeUtf(id);
     }
@@ -255,6 +278,11 @@ public class PowerData {
         for (int s = 1; s <= 5; s++) { items[s] = buf.readUtf(); counts[s] = buf.readVarInt(); }
         com.markadrii.draviti.ethergear.EtherGear.syncedItems = items;
         com.markadrii.draviti.ethergear.EtherGear.syncedCounts = counts;
+        d.egBorrowTicks = buf.readVarInt();
+        d.egBorrowForm = buf.readVarInt();
+        d.egBorrowDay = buf.readLong();
+        d.egSummoned = buf.readBoolean();
+        d.egShoulder = buf.readBoolean();
         int nb = buf.readVarInt();
         for (int i = 0; i < nb; i++) d.egBought.add(buf.readUtf());
         return d;

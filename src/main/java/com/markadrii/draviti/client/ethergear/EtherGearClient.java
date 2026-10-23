@@ -43,6 +43,15 @@ public final class EtherGearClient {
         }
     }
 
+    @SubscribeEvent
+    public static void rightClickEmpty(net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickEmpty event) {
+        var p = event.getEntity();
+        if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND && p.isShiftKeyDown()
+                && p.getMainHandItem().isEmpty() && Gravity.active(p, "_eg_shoulder"))
+            com.markadrii.draviti.network.ModNetwork.CHANNEL.sendToServer(
+                    new com.markadrii.draviti.network.MovePacket(com.markadrii.draviti.network.MovePacket.EG_SHOULDER_DOWN, 0, 0));
+    }
+
     public static void receive(EtherGearPacket p) {
         Minecraft mc = Minecraft.getInstance();
         switch (p.kind()) {

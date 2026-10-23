@@ -505,9 +505,15 @@ public class EtherGearScreen extends Screen {
         Component tip = d.egStars < EtherGearInterior.ENTER_STARS
                 ? Component.translatable("screen.draviti.eg.tip.enter_stars", EtherGearInterior.ENTER_STARS)
                 : d.egInside ? Component.translatable("screen.draviti.eg.tip.inside")
-                : Component.translatable("screen.draviti.eg.tip.days", left);
+                : Component.translatable("screen.draviti.eg.tip.inside");
         boolean ok = d.egStars >= EtherGearInterior.ENTER_STARS && left == 0 && !d.egInside;
         list.add(new Btn("enter", enter, ok, tip, bx, by, ew, 16));
+        bx += ew + 6;
+
+        // Invocar / Desinvocar (como el mini golem de Seals)
+        Component summon = Component.translatable(d.egSummoned ? "screen.draviti.eg.unsummon" : "screen.draviti.eg.summon");
+        int sw = font.width(summon) + 16;
+        list.add(new Btn("summon", summon, d.egSummoned || !d.egInside, Component.translatable("screen.draviti.eg.tip.inside"), bx, by, sw, 16));
         return list;
     }
 
@@ -576,6 +582,11 @@ public class EtherGearScreen extends Screen {
                 switch (b.id()) {
                     case "abilities" -> abilitiesPage = !abilitiesPage;
                     case "talk" -> ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_TALK, 0, 0));
+                    case "summon" -> {
+                        boolean summoning = !d.egSummoned;
+                        ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_SUMMON, 0, 0));
+                        if (summoning) onClose(); // se cierra para verlo aparecer
+                    }
                     case "enter" -> {
                         ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_ENTER, 0, 0));
                         onClose();

@@ -90,11 +90,15 @@ menú (como el de Seals): estrellas, afinidad y su modelo en 3D a la derecha. Ab
   Desbloquear). Por defecto 1 lingote de oro; se cambia por estrella en `config/draviti-common.toml` → `[ether_gear]`
   (`item` y `count`, 0 = gratis). Al pulsarla también ves daño, éter y enfriamiento.
 - **Hablar:** una vez al día.
-- **Entrar:** con 1 estrella, cada 3 días. Te lleva a su interior (una plataforma negra con líneas de éter); clic
-  derecho sobre él para hablar, meditar (rellena el éter) o salir.
+- **Entrar:** con 1 estrella, cuando quieras. Te lleva a su interior (una plataforma negra con líneas de éter);
+  clic derecho sobre él para hablar. Charlar ahí no da afinidad: puedes preguntarle cosas, salir y volver a donde
+  estabas, y si te falta el Overdrive o el Completo, **"Préstame tu poder"** (cada 5 días): te saca y te transforma
+  1 minuto sin gastar tu éter.
+- **Invocar / Desinvocar:** sale a acompañarte y flota a tu lado. Shift + clic derecho con la mano vacía sobre él: se
+  sube a tu hombro; shift + clic derecho con la mano vacía otra vez: se baja. Clic normal sobre él = Hablar.
 
 **Afinidad** (barra de 100 / 300 / 700 / 1000 / 1500 / 2000 según las estrellas): hablar +15, cada día de Minecraft
-+25, cerca de otros jugadores +3 por minuto, usar técnicas +2 cada 15 s, charlar +5 y meditar +20 en su interior.
++25, cerca de otros jugadores +3 por minuto y usar técnicas +2 cada 15 s.
 Todo se cambia en `config/draviti-common.toml` (en "pasivas").
 
 | Estrellas | Se pueden desbloquear (pagando lo que pida cada estrella) |

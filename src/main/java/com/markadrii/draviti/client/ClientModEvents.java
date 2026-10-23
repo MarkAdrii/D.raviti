@@ -60,6 +60,7 @@ public final class ClientModEvents {
                 pr.addLayer(new com.markadrii.draviti.client.render.EtherGearLayer(pr));
                 pr.addLayer(new OverdriveLayer(pr));
                 pr.addLayer(new GlowLimbLayer(pr));
+                pr.addLayer(new com.markadrii.draviti.client.ethergear.EtherGearShoulderLayer(pr, event.getEntityModels()));
             }
         }
     }

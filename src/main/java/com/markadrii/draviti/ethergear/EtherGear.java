@@ -219,8 +219,77 @@ public final class EtherGear {
         addAffinity(p, (int) stat("afinidad_habilidades", 2), null);
     }
 
+    // ------------------------------------------------------------------ préstamo de transformación
+
+    public static final int BORROW_TICKS = 20 * 60;
+
+    /** La técnica está prestada ahora mismo (Overdrive o Completo con el éter del Ether Gear). */
+    public static boolean borrowed(PowerData d, String abilityId) {
+        if (d.egBorrowTicks <= 0) return false;
+        return abilityId.equals("overdrive") || (d.egBorrowForm >= 2 && abilityId.equals("overdrive_completo"));
+    }
+
+    public static boolean borrowing(Player p) {
+        PowerData d = Gravity.data(p);
+        return d != null && d.egBorrowTicks > 0;
+    }
+
+    /** Qué forma le falta (1 Overdrive, 2 Completo) o 0 si ya las tiene las dos. */
+    public static int missingForm(PowerData d) {
+        if (!unlocked(d, "overdrive")) return 1;
+        if (!unlocked(d, "overdrive_completo")) return 2;
+        return 0;
+    }
+
+    public static int borrowDays() { return (int) stat("dias_entre_prestamos", 5); }
+
+    public static long borrowDaysLeft(PowerData d, long today) { return Math.max(0, d.egBorrowDay + borrowDays() - today); }
+
+    /** Te presta su éter: te transforma 1 minuto sin gastar el tuyo (se llama ya fuera de su interior). */
+    public static void startBorrow(ServerPlayer p, int form) {
+        PowerData d = Gravity.data(p);
+        Power pw = Gravity.power();
+        if (d == null || pw == null || form <= 0) return;
+        d.egBorrowTicks = BORROW_TICKS;
+        d.egBorrowForm = form;
+        d.egBorrowDay = today(p.server);
+        Ability od = pw.ability("overdrive").orElse(null);
+        Ability full = pw.ability("overdrive_completo").orElse(null);
+        if (od == null || full == null) return;
+        var so = d.state(pw, od);
+        if (form == 1) {
+            so.cooldown = 0;
+            if (!so.enabled) PowerManager.onKey(p, pw.id(), "overdrive", true);
+        } else {
+            // El Completo necesita el Overdrive activo: se activa sin su animación y luego la del Completo
+            if (!so.enabled) { so.enabled = true; so.activeTicks = 0; so.cooldown = 0; }
+            var sf = d.state(pw, full);
+            sf.cooldown = 0;
+            if (!sf.enabled) PowerManager.onKey(p, pw.id(), "overdrive_completo", true);
+        }
+        p.sendSystemMessage(Component.translatable("message.draviti.eg.borrow", BORROW_TICKS / 20)
+                .withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD));
+        PowerManager.sync(p);
+    }
+
+    private static void tickBorrow(ServerPlayer p, PowerData d) {
+        if (d.egBorrowTicks <= 0) return;
+        d.egBorrowTicks--;
+        if (d.egBorrowTicks % 20 == 0 && d.egBorrowTicks > 0)
+            p.displayClientMessage(Component.translatable("message.draviti.eg.borrow_left", d.egBorrowTicks / 20)
+                    .withStyle(ChatFormatting.LIGHT_PURPLE), true);
+        if (d.egBorrowTicks == 0) {
+            d.egBorrowForm = 0;
+            p.displayClientMessage(Component.translatable("message.draviti.eg.borrow_end").withStyle(ChatFormatting.GRAY), true);
+            relock(p, d);
+            PowerManager.sync(p);
+        }
+    }
+
     /** Cada tick del jugador (servidor). */
     public static void tick(ServerPlayer p) {
+        PowerData pd = Gravity.data(p);
+        if (pd != null && Gravity.has(p)) tickBorrow(p, pd);
         if (p.tickCount % 20 != 0 || !Gravity.has(p)) return;
         PowerData d = Gravity.data(p);
         long today = today(p.server);

@@ -44,7 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * El interior del Ether Gear: un vacío oscuro con una plataforma negra recorrida por líneas de éter moradas. En el
  * centro flota el Ether Gear; clic derecho sobre él (o acercarse) para hablar. Cada jugador tiene su zona.
- * Se entra desde el menú de la U con 1 estrella, cada pocos días.
+ * Se entra desde el menú de la U con 1 estrella, cuando quieras. Charlar ahí no da afinidad; lo único que hace algo es
+ * pedirle que te preste la transformación (cada 5 días).
  */
 @Mod.EventBusSubscriber(modid = Draviti.MOD_ID)
 public final class EtherGearInterior {
@@ -72,12 +73,8 @@ public final class EtherGearInterior {
         return s != null && entity.equals(s.entityId);
     }
 
-    public static int daysBetweenVisits() { return (int) EtherGear.stat("dias_entre_visitas", 3); }
-
-    /** Días que faltan para poder entrar (0 = ya). Vale en el cliente con el día del mundo. */
-    public static long daysLeft(PowerData d, long today) {
-        return Math.max(0, d.egEnterDay + daysBetweenVisits() - today);
-    }
+    /** Con 1 estrella se puede entrar cuando quieras (0 = ya). */
+    public static long daysLeft(PowerData d, long today) { return 0; }
 
     // ------------------------------------------------------------------ entrar / salir
 
@@ -89,11 +86,6 @@ public final class EtherGearInterior {
             return;
         }
         long today = EtherGear.today(p.server);
-        long left = daysLeft(d, today);
-        if (left > 0) {
-            p.displayClientMessage(Component.translatable("message.draviti.eg.enter_wait", left).withStyle(ChatFormatting.GRAY), true);
-            return;
-        }
         ServerLevel inner = p.server.getLevel(KEY);
         if (inner == null) {
             p.displayClientMessage(Component.translatable("message.draviti.eg.unavailable").withStyle(ChatFormatting.RED), true);
@@ -119,6 +111,7 @@ public final class EtherGearInterior {
         inner.playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1F, 0.6F);
         p.sendSystemMessage(Component.translatable("message.draviti.eg.enter").withStyle(ChatFormatting.LIGHT_PURPLE));
         PowerManager.sync(p);
+        com.markadrii.draviti.data.CommonEvents.resyncLater(p);
     }
 
     public static void exit(ServerPlayer p) {
@@ -141,6 +134,7 @@ public final class EtherGearInterior {
             dest.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1F, 1.2F);
         }
         PowerManager.sync(p);
+        com.markadrii.draviti.data.CommonEvents.resyncLater(p);
     }
 
     private static void cleanup(MinecraftServer server, UUID owner) {
@@ -207,6 +201,8 @@ public final class EtherGearInterior {
         List<Integer> list = new ArrayList<>();
         for (EgOption o : EgOption.values()) {
             if (o.bit != 0 && (d.egVisit & o.bit) != 0) continue;
+            // Solo si te falta alguna de las dos transformaciones
+            if (o == EgOption.BORROW && EtherGear.missingForm(d) == 0) continue;
             list.add(o.ordinal());
         }
         return list;
@@ -227,21 +223,30 @@ public final class EtherGearInterior {
             case HOW -> {
                 d.egVisit |= o.bit;
                 dialog(p, Component.translatable(k + "how." + d.egStars), options(d));
-                EtherGear.addAffinity(p, (int) EtherGear.stat("afinidad_charla", 5), "message.draviti.eg.reason.chat");
             }
             case WHAT -> {
                 d.egVisit |= o.bit;
                 dialog(p, Component.translatable(k + "what." + r.nextInt(3)), options(d));
-                EtherGear.addAffinity(p, (int) EtherGear.stat("afinidad_charla", 5), "message.draviti.eg.reason.chat");
             }
-            case MEDITATE -> {
+            case ASK_OVERDRIVE, ASK_WHY, ASK_ETHER -> {
                 d.egVisit |= o.bit;
-                Gravity.setEther(p, Gravity.etherMax(p));
-                p.heal(p.getMaxHealth());
-                Gravity.fxOn(p, Fx.WEIGHTLESS, p, p.getBbHeight(), 60);
-                Gravity.sound(p, p.position(), SoundEvents.BEACON_POWER_SELECT, 1F, 0.7F);
-                dialog(p, Component.translatable(k + "meditate"), options(d));
-                EtherGear.addAffinity(p, (int) EtherGear.stat("afinidad_meditar", 20), "message.draviti.eg.reason.meditate");
+                String q = o.name().substring(4).toLowerCase();
+                dialog(p, Component.translatable(k + "ask." + q + "." + r.nextInt(2)), options(d));
+            }
+            case BORROW -> {
+                int form = EtherGear.missingForm(d);
+                if (form == 0) return;
+                long left = EtherGear.borrowDaysLeft(d, EtherGear.today(p.server));
+                if (left > 0) {
+                    dialog(p, Component.translatable(k + "borrow.wait", left), options(d));
+                    return;
+                }
+                // Te saca de su interior y te presta su éter
+                ModNetwork.CHANNEL.send(PacketDistributor.PLAYER.with(() -> p),
+                        EtherGearPacket.close(Component.translatable(k + "borrow." + form)));
+                exit(p);
+                EtherGear.startBorrow(p, form);
+                return;
             }
             case NEXT -> {
                 Component line = EtherGear.maxed(d) || d.egStars >= EtherGear.MAX_STARS

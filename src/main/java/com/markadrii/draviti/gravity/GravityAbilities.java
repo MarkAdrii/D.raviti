@@ -708,18 +708,24 @@ public final class GravityAbilities {
     /** Overdrive: el pelo y la piel se aclaran, salen marcas de éter y cuernos de energía; fuerza y técnicas al máximo. */
     public static final AbilityBehavior OVERDRIVE = new AbilityBehavior() {
         @Override
-        public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.hasEther(p, a.stat("min_ether")); }
+        public boolean canActivate(ServerPlayer p, Ability a) {
+            return com.markadrii.draviti.ethergear.EtherGear.borrowing(p) || Gravity.hasEther(p, a.stat("min_ether"));
+        }
 
         @Override
         public void onActivate(ServerPlayer p, Ability a) { transform(p, false); }
 
         @Override
         public void tick(ServerPlayer p, Ability a, int t) {
-            if (t % 20 == 0) Gravity.setEther(p, Gravity.ether(p) - (int) a.stat("ether_per_second"));
+            // Con el éter prestado del Ether Gear no se gasta el tuyo
+            if (t % 20 == 0 && !com.markadrii.draviti.ethergear.EtherGear.borrowing(p))
+                Gravity.setEther(p, Gravity.ether(p) - (int) a.stat("ether_per_second"));
         }
 
         @Override
-        public boolean shouldStop(ServerPlayer p, Ability a) { return Gravity.ether(p) <= 0; }
+        public boolean shouldStop(ServerPlayer p, Ability a) {
+            return !com.markadrii.draviti.ethergear.EtherGear.borrowing(p) && Gravity.ether(p) <= 0;
+        }
 
         @Override
         public void onDeactivate(ServerPlayer p, Ability a) {
@@ -734,14 +740,18 @@ public final class GravityAbilities {
      */
     public static final AbilityBehavior FULL_OVERDRIVE = new AbilityBehavior() {
         @Override
-        public boolean canActivate(ServerPlayer p, Ability a) { return Gravity.hasEther(p, a.stat("min_ether")); }
+        public boolean canActivate(ServerPlayer p, Ability a) {
+            return com.markadrii.draviti.ethergear.EtherGear.borrowing(p) || Gravity.hasEther(p, a.stat("min_ether"));
+        }
 
         @Override
         public void onActivate(ServerPlayer p, Ability a) { transform(p, true); }
 
         @Override
         public void tick(ServerPlayer p, Ability a, int t) {
-            if (t % 20 == 0) Gravity.setEther(p, Gravity.ether(p) - (int) a.stat("ether_per_second"));
+            // Con el éter prestado del Ether Gear no se gasta el tuyo
+            if (t % 20 == 0 && !com.markadrii.draviti.ethergear.EtherGear.borrowing(p))
+                Gravity.setEther(p, Gravity.ether(p) - (int) a.stat("ether_per_second"));
             // Agujero negro: atrae criaturas, objetos y ataques
             double r = a.stat("pull_radius");
             Vec3 c = p.position().add(0, 1, 0);
@@ -764,7 +774,9 @@ public final class GravityAbilities {
         }
 
         @Override
-        public boolean shouldStop(ServerPlayer p, Ability a) { return Gravity.ether(p) <= 0; }
+        public boolean shouldStop(ServerPlayer p, Ability a) {
+            return !com.markadrii.draviti.ethergear.EtherGear.borrowing(p) && Gravity.ether(p) <= 0;
+        }
 
         @Override
         public void onDeactivate(ServerPlayer p, Ability a) {

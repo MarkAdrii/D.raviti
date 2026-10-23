@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 public record MovePacket(int action, float x, float z) {
     public static final int SONIC_START = 0, SONIC_STOP = 1, DASH = 2, TOGGLE_BLOCKS = 3, TOGGLE_MARK = 4, TOGGLE_FLOAT = 5,
             /** Ether Gear: hablar, entrar en su interior y elegir respuesta (x = opción). */
-            EG_TALK = 6, EG_ENTER = 7, EG_DIALOG = 8, EG_BUY = 9;
+            EG_TALK = 6, EG_ENTER = 7, EG_DIALOG = 8, EG_BUY = 9, EG_SUMMON = 10, EG_SHOULDER_DOWN = 11;
 
     public void encode(FriendlyByteBuf buf) {
         buf.writeVarInt(action);

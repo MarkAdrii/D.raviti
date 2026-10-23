@@ -125,8 +125,8 @@ public final class Powers {
                         .stat("ether_per_kill", 60).stat("ether_per_boss_kill", 400).stat("ether_per_player_kill", 200)
                         // Afinidad con el Ether Gear (menú de la U)
                         .stat("afinidad_hablar", 15).stat("afinidad_por_dia", 25).stat("afinidad_cerca_de_jugadores", 3)
-                        .stat("afinidad_habilidades", 2).stat("afinidad_charla", 5).stat("afinidad_meditar", 20)
-                        .stat("dias_entre_visitas", 3))
+                        .stat("afinidad_habilidades", 2)
+                        .stat("dias_entre_prestamos", 5))
                 .register();
     }
 

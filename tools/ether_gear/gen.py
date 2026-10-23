@@ -111,18 +111,18 @@ fill(faces(30, 0, 9, 3, 8)["top"], lambda i, j, W, H: strands(i))
 def fringe(i, j, W, H):
     depth = (3, 5, 5, 4, 3, 2)[i % 6]
     if j > depth: return CLEAR
-    if j == depth: return HAIR_O
+    if j == depth: return HAIR_D
     return strands(i)
 for name in ("front", "back", "right", "left"):
     fill(faces(30, 0, 9, 3, 8)[name], fringe)
-fill(faces(30, 0, 9, 3, 8)["bottom"], lambda i, j, W, H: HAIR_D)
+fill(faces(30, 0, 9, 3, 8)["bottom"], lambda i, j, W, H: CLEAR)  # se veía como un borde gris
 # Flequillo: puntas hacia abajo, con huecos para que se vean los ojos
 def bangs_front(i, j, W, H):
     # 16 x 6 px: triángulos invertidos de 4 px de ancho
     k = i % 4
     depth = {0: 1, 1: 3, 2: 2, 3: 0}[k] if (i // 4) % 2 == 0 else {0: 0, 1: 2, 2: 3, 3: 1}[k]
     if j >= depth + 1: return CLEAR
-    return HAIR_O if j == depth else strands(i)
+    return HAIR_D if j == depth else strands(i)
 BG = faces(20, 26, 8, 3, 1)
 fill(BG["front"], bangs_front); fill(BG["back"], bangs_front)
 fill(BG["top"], lambda i, j, W, H: strands(i))
