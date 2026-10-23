@@ -40,7 +40,7 @@ public final class GravityMovement {
                 PowerManager.sync(p);
             }
             case MovePacket.EG_TALK -> com.markadrii.draviti.ethergear.EtherGear.talk(p);
-            case MovePacket.EG_ENTER -> com.markadrii.draviti.ethergear.EtherGearInterior.enter(p);
+            case MovePacket.EG_ENTER -> com.markadrii.draviti.ethergear.EtherGearInterior.enter(p, m.x() > 0.5F);
             case MovePacket.EG_SUMMON -> com.markadrii.draviti.ethergear.EtherGearCompanion.toggle(p);
             case MovePacket.EG_SHOULDER_DOWN -> com.markadrii.draviti.ethergear.EtherGearCompanion.down(p, null);
             case MovePacket.EG_BUY -> com.markadrii.draviti.ethergear.EtherGear.buy(p, (int) m.x());

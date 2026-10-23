@@ -60,9 +60,17 @@ public final class EtherGearInterior {
         UUID entityId;
         int spawnDelay = 2, respawns;
         boolean greeted;
+        /** Criaturas (y jugadores) que entraron acompañándote y a dónde devolverlas. */
+        final java.util.List<Guest> guests = new java.util.ArrayList<>();
 
         Session(BlockPos origin) { this.origin = origin; }
     }
+
+    private record Guest(UUID id, boolean player, ResourceKey<Level> dim, double x, double y, double z, float yaw) {}
+
+    /** Estrellas para "Entrar acompañado" y distancia (en bloques, desde tu cuerpo) de lo que entra contigo. */
+    public static final int COMPANY_STARS = 5;
+    public static final double COMPANY_RANGE = 1.0;
 
     private EtherGearInterior() {}
 
@@ -78,7 +86,10 @@ public final class EtherGearInterior {
 
     // ------------------------------------------------------------------ entrar / salir
 
-    public static void enter(ServerPlayer p) {
+    public static void enter(ServerPlayer p) { enter(p, false); }
+
+    /** withCompany: con 5 estrellas, también entran las criaturas que estén a menos de 1 bloque de ti. */
+    public static void enter(ServerPlayer p, boolean withCompany) {
         PowerData d = Gravity.data(p);
         if (d == null || !Gravity.has(p) || d.egInside || isInside(p)) return;
         if (d.egStars < ENTER_STARS) {
@@ -103,9 +114,42 @@ public final class EtherGearInterior {
         d.egInside = true;
         d.egVisit = 0;
         d.egEnterDay = today;
-        SESSIONS.put(p.getUUID(), new Session(origin));
+        Session session = new Session(origin);
+        SESSIONS.put(p.getUUID(), session);
+
+        // Lo que entra contigo se elige antes de moverte (a menos de 1 bloque de tu cuerpo)
+        java.util.List<net.minecraft.world.entity.LivingEntity> company = new java.util.ArrayList<>();
+        if (withCompany && d.egStars >= COMPANY_STARS) {
+            company.addAll(p.serverLevel().getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class,
+                    p.getBoundingBox().inflate(COMPANY_RANGE), e -> e != p && e.isAlive() && !e.isSpectator()
+                            && !(e instanceof EtherGearEntity) && !(e instanceof net.minecraft.world.entity.decoration.ArmorStand)
+                            && !isInside(e) && !(e instanceof ServerPlayer sp && Gravity.data(sp) != null && Gravity.data(sp).egInside)));
+        }
 
         p.teleportTo(inner, origin.getX() + 0.5, origin.getY(), origin.getZ() - 8 + 0.5, 0F, 0F);
+        int i = 0;
+        for (var e : company) {
+            double ang = i++ * 2.4, r = 1.6 + (i % 3) * 0.6;
+            double gx = origin.getX() + 0.5 + Math.cos(ang) * r, gz = origin.getZ() - 8 + 0.5 + Math.sin(ang) * r;
+            Guest g = new Guest(e.getUUID(), e instanceof ServerPlayer, e.level().dimension(), e.getX(), e.getY(), e.getZ(), e.getYRot());
+            if (e instanceof ServerPlayer gp) {
+                PowerData gd = Gravity.data(gp);
+                if (gd != null) {
+                    gd.egReturnDim = gp.level().dimension().location().toString();
+                    gd.egRx = gp.getX(); gd.egRy = gp.getY(); gd.egRz = gp.getZ(); gd.egRyaw = gp.getYRot();
+                    gd.egInside = true;
+                }
+                gp.teleportTo(inner, gx, origin.getY(), gz, 0F, 0F);
+                gp.sendSystemMessage(Component.translatable("message.draviti.eg.guest", p.getDisplayName()).withStyle(ChatFormatting.LIGHT_PURPLE));
+                PowerManager.sync(gp);
+                com.markadrii.draviti.data.CommonEvents.resyncLater(gp);
+            } else {
+                e.teleportTo(inner, gx, origin.getY(), gz, java.util.Set.of(), e.getYRot(), 0F);
+            }
+            session.guests.add(g);
+        }
+        if (!company.isEmpty())
+            p.sendSystemMessage(Component.translatable("message.draviti.eg.enter_company", company.size()).withStyle(ChatFormatting.LIGHT_PURPLE));
         p.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 40, 0, false, false));
         inner.playSound(null, p.blockPosition(), SoundEvents.AMETHYST_BLOCK_RESONATE, SoundSource.PLAYERS, 1.2F, 0.5F);
         inner.playSound(null, p.blockPosition(), SoundEvents.BEACON_ACTIVATE, SoundSource.PLAYERS, 1F, 0.6F);
@@ -139,12 +183,31 @@ public final class EtherGearInterior {
 
     private static void cleanup(MinecraftServer server, UUID owner) {
         Session s = SESSIONS.remove(owner);
-        if (s == null || s.entityId == null) return;
+        if (s == null) return;
+        returnGuests(server, s);
+        if (s.entityId == null) return;
         ServerLevel inner = server.getLevel(KEY);
         if (inner != null) {
             Entity e = inner.getEntity(s.entityId);
             if (e != null) e.discard();
         }
+    }
+
+    /** Al salir (o desconectarte, morir...) lo que entró contigo vuelve a donde estaba. */
+    private static void returnGuests(MinecraftServer server, Session s) {
+        ServerLevel inner = server.getLevel(KEY);
+        for (Guest g : s.guests) {
+            if (g.player()) {
+                ServerPlayer gp = server.getPlayerList().getPlayer(g.id());
+                if (gp != null && isInside(gp)) exit(gp);
+                continue;
+            }
+            Entity e = inner == null ? null : inner.getEntity(g.id());
+            ServerLevel dest = server.getLevel(g.dim());
+            if (e == null || !e.isAlive() || dest == null) continue;
+            e.teleportTo(dest, g.x(), g.y(), g.z(), java.util.Set.of(), g.yaw(), 0F);
+        }
+        s.guests.clear();
     }
 
     private static void spawnEntity(ServerLevel inner, Session s) {

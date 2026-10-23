@@ -105,6 +105,8 @@ menú (como el de Seals): estrellas, afinidad y su modelo en 3D a la derecha. Ab
   clic derecho sobre él para hablar. Charlar ahí no da afinidad: puedes preguntarle cosas, salir y volver a donde
   estabas, y si te falta el Overdrive o el Completo, **"Préstame tu poder"** (cada 5 días): te saca y te transforma
   1 minuto sin gastar tu éter.
+- **Entrar acompañado** (5 estrellas): entras con las criaturas (y jugadores) que estén a menos de 1 bloque de ti;
+  al salir vuelven a donde estaban.
 - **Invocar / Desinvocar:** sale a acompañarte y flota a tu lado. Shift + clic derecho con la mano vacía sobre él: se
   sube a tu hombro; shift + clic derecho con la mano vacía otra vez: se baja. Clic normal sobre él = Hablar.
 
@@ -119,7 +121,7 @@ Todo se cambia en `config/draviti-common.toml` (en "pasivas").
 | ★★ | Overdrive, Centro de Gravedad, Cometa, Placaje, Ingravidez Ajena |
 | ★★★ | +1500 de éter máximo, Impacto Gravitatorio, Peso Infernal, Campo Gravitatorio |
 | ★★★★ | Meteor Breaker, Cielo Negro |
-| ★★★★★ | Overdrive Completo |
+| ★★★★★ | Overdrive Completo, entrar acompañado |
 
 Comandos: `/draviti estrellas @s 3`, `/draviti desbloquear @s` (todas pagadas), `/draviti afinidad @s 200`, `/draviti esperas @s` (hablar y entrar ya).
 

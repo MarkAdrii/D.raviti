@@ -195,5 +195,8 @@
   "message.draviti.eg.summoned": "The Ether Gear comes out with you (shift + click with an empty hand to put it on your shoulder)",
   "message.draviti.eg.unsummoned": "The Ether Gear goes back inside you",
   "screen.draviti.eg.summon": "Summon",
-  "screen.draviti.eg.unsummon": "Dismiss"
+  "screen.draviti.eg.unsummon": "Dismiss",
+  "screen.draviti.eg.enter_with": "Enter with company",
+  "message.draviti.eg.enter_company": "You enter with %s creature(s)",
+  "message.draviti.eg.guest": "You entered %s's Ether Gear"
 }

@@ -174,7 +174,17 @@ public final class PlayTest {
                 mc.options.setCameraType(CameraType.FIRST_PERSON);
             }
             case 810 -> shot(mc, "13_barra");
-            case 830 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
+            // ---- Entrar acompañado (5 estrellas): un cerdo pegado al jugador entra y sale con él
+            case 830 -> { mc.options.setCameraType(CameraType.FIRST_PERSON); cmd(mc, "summon minecraft:pig ~0.6 ~ ~0.6 {NoAI:1b}"); }
+            case 840 -> ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_ENTER, 1, 0));
+            case 920 -> server(mc, p -> LOG.info("DRAVITI_PLAYTEST acompanado dentro={} cerdos_dentro={}", EtherGearInterior.isInside(p),
+                    p.serverLevel().getEntities(net.minecraft.world.entity.EntityType.PIG, x -> true).size()));
+            case 925 -> { mc.options.setCameraType(CameraType.THIRD_PERSON_FRONT); }
+            case 935 -> shot(mc, "14_acompanado");
+            case 940 -> server(mc, EtherGearInterior::exit);
+            case 1000 -> server(mc, p -> LOG.info("DRAVITI_PLAYTEST acompanado vuelta dim={} cerdos_aqui={}", p.level().dimension().location(),
+                    p.serverLevel().getEntities(net.minecraft.world.entity.EntityType.PIG, x -> true).size()));
+            case 1010 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
             default -> {}
         }
     }

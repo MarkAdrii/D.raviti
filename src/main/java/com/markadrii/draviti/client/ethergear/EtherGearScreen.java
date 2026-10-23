@@ -516,6 +516,14 @@ public class EtherGearScreen extends Screen {
         list.add(new Btn("enter", enter, ok, tip, bx, by, ew, 16));
         bx += ew + 6;
 
+        // Con 5 estrellas: entrar con las criaturas que estén a menos de 1 bloque
+        if (d.egStars >= EtherGearInterior.COMPANY_STARS) {
+            Component with = Component.translatable("screen.draviti.eg.enter_with");
+            int ww = font.width(with) + 16;
+            list.add(new Btn("enter_with", with, ok, Component.translatable("screen.draviti.eg.tip.inside"), bx, by, ww, 16));
+            bx += ww + 6;
+        }
+
         // Invocar / Desinvocar (como el mini golem de Seals)
         Component summon = Component.translatable(d.egSummoned ? "screen.draviti.eg.unsummon" : "screen.draviti.eg.summon");
         int sw = font.width(summon) + 16;
@@ -595,6 +603,10 @@ public class EtherGearScreen extends Screen {
                     }
                     case "enter" -> {
                         ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_ENTER, 0, 0));
+                        onClose();
+                    }
+                    case "enter_with" -> {
+                        ModNetwork.CHANNEL.sendToServer(new MovePacket(MovePacket.EG_ENTER, 1, 0));
                         onClose();
                     }
                     default -> {}

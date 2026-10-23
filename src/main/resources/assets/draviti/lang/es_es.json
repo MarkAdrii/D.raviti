@@ -195,5 +195,8 @@
   "message.draviti.eg.summoned": "El Ether Gear sale a acompañarte (shift + clic con la mano vacía para subirlo al hombro)",
   "message.draviti.eg.unsummoned": "El Ether Gear vuelve dentro de ti",
   "screen.draviti.eg.summon": "Invocar",
-  "screen.draviti.eg.unsummon": "Desinvocar"
+  "screen.draviti.eg.unsummon": "Desinvocar",
+  "screen.draviti.eg.enter_with": "Entrar acompañado",
+  "message.draviti.eg.enter_company": "Entras acompañado de %s criatura(s)",
+  "message.draviti.eg.guest": "Has entrado en el Ether Gear de %s"
 }
