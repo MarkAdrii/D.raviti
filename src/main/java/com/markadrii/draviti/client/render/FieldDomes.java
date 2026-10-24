@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Campo Gravitatorio: una esfera semitransparente que cubre la zona, con un brillo hexagonal que gira y late.
+ * Campo Gravitatorio: una esfera de energía semitransparente (EnergySphere) que cubre la zona mientras dura.
  * Turquesa pálido (normal y Overdrive) o morada (Overdrive completo). Los demás jugadores también la ven.
  */
 @Mod.EventBusSubscriber(modid = Draviti.MOD_ID, value = Dist.CLIENT)
@@ -83,20 +83,12 @@ public final class FieldDomes {
             float scale = grow < 1 ? (float) Math.sin(grow * Math.PI * 0.5) * 1.06F : 1F + 0.015F * Mth.sin(age * 0.2F);
             float alpha = (1 - close) * Mth.clamp(age / 4F, 0, 1);
             float r = d.radius * scale * (1 - close * 0.15F);
-            float[] c = d.violet ? new float[]{0.62F, 0.34F, 1.0F} : new float[]{0.48F, 0.92F, 0.80F};
 
-            pose.pushPose();
-            pose.translate(d.pos.x - cam.x, d.pos.y - cam.y, d.pos.z - cam.z);
-            // Relleno translúcido
-            sphere(pose, buf.getBuffer(RenderType.entityTranslucent(FILL)), r, 0, 1, c[0], c[1], c[2], 0.16F * alpha);
-            // Rejilla brillante que gira despacio
-            pose.mulPose(com.mojang.math.Axis.YP.rotationDegrees(age * 0.6F));
-            float k = (0.55F + 0.15F * Mth.sin(age * 0.25F)) * alpha;
-            sphere(pose, buf.getBuffer(RenderType.eyes(HEX)), r * 1.003F, 0, 4, c[0] * k, c[1] * k, c[2] * k, 1F);
-            pose.popPose();
+            // Misma esfera de energía que las demás técnicas de área
+            AreaSpheres.draw(pose, buf, d.pos, cam, r, d.violet, 0.8F * alpha, age);
         }
-        buf.endBatch(RenderType.entityTranslucent(FILL));
-        buf.endBatch(RenderType.eyes(HEX));
+        buf.endBatch(EnergySphere.white());
+        buf.endBatch(EnergySphere.swirl());
     }
 
     /** Esfera UV (solo la parte de arriba del suelo hacia arriba se ve, la de abajo queda enterrada). */

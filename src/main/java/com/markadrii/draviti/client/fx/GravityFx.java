@@ -77,6 +77,43 @@ public final class GravityFx {
     // Entrada desde el servidor
     // =====================================================================================
 
+    /** true = el efecto es solo la esfera (no se dibuja el de partículas de antes). */
+    private static boolean areaSphere(FxPacket p, Vec3 pos) {
+        boolean violet = p.tier() >= 2;
+        var B = com.markadrii.draviti.client.render.AreaSpheres.Kind.BURST;
+        switch (p.type()) {
+            case Fx.SHOCKWAVE -> {
+                // Las pequeñas (al pisar, al transformarse) siguen siendo anillos en el suelo
+                if (p.a() < 3.5F) return false;
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.2, 0), p.a(), B, 22, violet);
+                return true;
+            }
+            case Fx.SPIN_RING -> {
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a(), B, 14, violet);
+                return true;
+            }
+            case Fx.SPIRAL -> {
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.5, 0), p.a(),
+                        com.markadrii.draviti.client.render.AreaSpheres.Kind.IMPLODE, Math.max(20, (int) p.b()), violet);
+                return true;
+            }
+            case Fx.IMPACT -> {
+                // La esfera y además el polvo del cráter
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.3, 0), p.a() * 1.1F, B, 18, violet);
+                return false;
+            }
+            case Fx.SPHERE_BURST -> {
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.2F, B, 20, violet);
+                return false;
+            }
+            case Fx.BLACK_SKY_BURST -> {
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.4F, B, 34, violet);
+                return false;
+            }
+            default -> { return false; }
+        }
+    }
+
     public static void play(FxPacket p) {
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
@@ -87,6 +124,8 @@ public final class GravityFx {
         // Campo Gravitatorio: la esfera la dibuja FieldDomes (con o sin Photon)
         if (p.type() == Fx.FIELD)
             com.markadrii.draviti.client.render.FieldDomes.update(p.entityId(), pos, p.a(), (int) p.b(), p.tier() >= 2);
+        // Técnicas de área: esfera de energía semitransparente (AreaSpheres) en lugar de los anillos de partículas
+        if (areaSphere(p, pos)) return;
         if (PhotonBridge.available() && p.type() > Fx.GLOW && photon(p, src, pos)) return;
         switch (p.type()) {
             case Fx.ANIM -> {

@@ -54,6 +54,7 @@ public final class GravityClient {
         if (mc.level == null || mc.player == null) {
             GravityFx.clear();
             com.markadrii.draviti.client.render.FieldDomes.clear();
+            com.markadrii.draviti.client.render.AreaSpheres.clear();
             sonic = false;
             return;
         }
