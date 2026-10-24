@@ -199,9 +199,20 @@ public final class PlayTest {
             // ---- Cielo Negro: cráter en un bloque grande de piedra (se cuentan los bloques rotos)
             case 1200 -> {
                 server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "antigravedad", true));
+                cmd(mc, "tp @s ~ 20 ~");
+            }
+            case 1205 -> {
                 cmd(mc, "fill ~-16 ~-22 ~-16 ~16 ~-1 ~16 minecraft:stone");
                 cmd(mc, "fill ~-16 ~-22 ~17 ~16 ~-1 ~40 minecraft:stone");
             }
+            case 1210 -> server(mc, p -> {
+                var lvl = p.serverLevel();
+                var base = p.blockPosition();
+                int air = 0;
+                for (int x = -16; x <= 16; x++) for (int z = -16; z <= 40; z++) for (int y = -22; y <= -1; y++)
+                    if (lvl.getBlockState(base.offset(x, y, z)).isAir()) air++;
+                LOG.info("DRAVITI_PLAYTEST cielo_negro aire_antes={}", air);
+            });
             case 1215 -> {
                 mc.player.setXRot(35F); mc.player.setYRot(0F);
                 server(mc, p -> { p.setXRot(35F); p.setYRot(0F); p.setYHeadRot(0F); });
