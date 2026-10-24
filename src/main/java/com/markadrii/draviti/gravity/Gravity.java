@@ -273,6 +273,18 @@ public final class Gravity {
      * Nunca rompe bloques con inventario (cofres...), ni irrompibles, y pregunta a las protecciones (BreakEvent).
      */
     public static void crater(ServerPlayer p, Vec3 center, double radius, double depthFactor) {
+        crater(p, center, radius, depthFactor, false);
+    }
+
+    /** Bloques que se rompen como mucho en un mismo tick; el resto, en los siguientes (para no congelar el servidor). */
+    private static final int CRATER_PER_TICK = 700;
+
+    /**
+     * full = esfera entera alrededor del centro (Cielo Negro, que lo aplasta todo); si no, media esfera aplastada
+     * hacia abajo. Se rompe del centro hacia fuera, todo el cráter (antes se cortaba a los 600 bloques y en los
+     * cráteres grandes solo se rompía la mitad).
+     */
+    public static void crater(ServerPlayer p, Vec3 center, double radius, double depthFactor, boolean full) {
         if (!CommonConfig.breakBlocks() || radius < 0.5) return;
         PowerData pd = data(p);
         if (pd != null && !pd.breakBlocks) return;
@@ -282,18 +294,29 @@ public final class Gravity {
         float max = CommonConfig.maxHardness();
         int r = (int) Math.ceil(radius);
         BlockPos c = BlockPos.containing(center);
-        int broken = 0;
+        List<long[]> list = new ArrayList<>();
         for (int x = -r; x <= r; x++)
             for (int z = -r; z <= r; z++)
-                for (int y = -r; y <= 1; y++) {
-                    double dy = y < 0 ? y / Math.max(0.2, depthFactor) : y * 2.0;
+                for (int y = -r; y <= (full ? r : 1); y++) {
+                    double dy = full ? y : y < 0 ? y / Math.max(0.2, depthFactor) : y * 2.0;
                     double dist = Math.sqrt(x * x + z * z + dy * dy);
                     if (dist > radius) continue;
                     // Borde irregular
                     if (dist > radius - 1 && p.getRandom().nextFloat() < 0.4F) continue;
-                    BlockPos pos = c.offset(x, y, z);
-                    if (breakBlock(p, level, pos, max) && ++broken > 600) return;
+                    list.add(new long[]{c.offset(x, y, z).asLong(), (long) (dist * 1000)});
                 }
+        list.sort(java.util.Comparator.comparingLong(e -> e[1]));
+        if (list.size() <= CRATER_PER_TICK) {
+            for (long[] e : list) breakBlock(p, level, BlockPos.of(e[0]), max);
+            return;
+        }
+        int[] next = {0};
+        Tasks.start(p, t -> {
+            if (p.serverLevel() != level) return true;
+            int end = Math.min(list.size(), next[0] + CRATER_PER_TICK);
+            for (; next[0] < end; next[0]++) breakBlock(p, level, BlockPos.of(list.get(next[0])[0]), max);
+            return next[0] >= list.size();
+        });
     }
 
     public static boolean breakBlock(ServerPlayer p, ServerLevel level, BlockPos pos, float maxHardness) {

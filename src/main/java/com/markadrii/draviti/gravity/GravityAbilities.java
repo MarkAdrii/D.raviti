@@ -376,7 +376,7 @@ public final class GravityAbilities {
                 Gravity.launchFrom(e, at, 1.3 * Gravity.mult(p), 0.8);
             }
             Gravity.crater(p, at.subtract(0, 0.5, 0), r * 0.8, 0.7);
-            Gravity.fx(p, Fx.IMPACT, at, (float) r, 0);
+            Gravity.fx(p, Fx.IMPACT, at, (float) r, 3); // 3 = patada: sin esfera
             Gravity.shake(p, at, 2F, 20);
             Gravity.sound(p, at, SoundEvents.GENERIC_EXPLODE, 2.5F, 0.6F);
             Gravity.sound(p, at, SoundEvents.ANVIL_LAND, 1.2F, 0.4F);
@@ -406,7 +406,7 @@ public final class GravityAbilities {
             Gravity.setMotion(p, new Vec3(0, 0.25, 0));
             Vec3 ground = Gravity.ground(p.serverLevel(), target.position(), 8);
             Gravity.crater(p, ground, a.stat("crater") * sqrtMult(p), 0.8);
-            Gravity.fx(p, Fx.IMPACT, ground, (float) a.stat("crater") + 1.5F, 0);
+            Gravity.fx(p, Fx.IMPACT, ground, (float) a.stat("crater") + 1.5F, 3); // 3 = patada: sin esfera
             Gravity.fx(p, Fx.CRUSH_COLUMN, ground, 4, 0);
             Gravity.shake(p, ground, 1.8F, 16);
             Gravity.sound(p, ground, SoundEvents.GENERIC_EXPLODE, 2F, 0.7F);

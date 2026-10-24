@@ -196,7 +196,8 @@ public class GravitySphereEntity extends Projectile {
                 Gravity.hurtRaw(p, e, dmg);
                 Gravity.launchFrom(e, at, kb, 1.2);
             }
-            Gravity.crater(p, at, r, 1.0);
+            // Esfera entera: aplasta lo que haya alrededor del punto, también por encima
+            Gravity.crater(p, at, r, 1.0, true);
             FxPacket.send(level, Fx.IMPACT, p, at, r, 2);
             Gravity.shake(p, at, 4F, 45);
             level.playSound(null, at.x, at.y, at.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 6F, 0.4F);

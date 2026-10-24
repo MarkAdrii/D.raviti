@@ -89,8 +89,8 @@ public final class GravityFx {
                 return true;
             }
             case Fx.SPIN_RING -> {
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a(), B, 22, violet);
-                return true;
+                // Patada Molinete: sin esfera, su anillo de siempre
+                return false;
             }
             case Fx.SPIRAL -> {
                 com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.5, 0), p.a(),
@@ -98,6 +98,8 @@ public final class GravityFx {
                 return true;
             }
             case Fx.IMPACT -> {
+                // Patadas (Cometa, Placaje): sin esfera
+                if (p.b() == 3) return false;
                 // La esfera y además el polvo del cráter
                 com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.3, 0), p.a() * 1.1F, B, 18, violet);
                 return false;

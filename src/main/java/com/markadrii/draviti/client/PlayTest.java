@@ -196,7 +196,29 @@ public final class PlayTest {
             case 1165 -> shot(mc, "18_campo");
             case 1175 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "antigravedad", true));
             case 1192 -> shot(mc, "19_antigravedad");
-            case 1200 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
+            // ---- Cielo Negro: cráter en un bloque grande de piedra (se cuentan los bloques rotos)
+            case 1200 -> {
+                server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "antigravedad", true));
+                cmd(mc, "fill ~-16 ~-22 ~-16 ~16 ~-1 ~16 minecraft:stone");
+                cmd(mc, "fill ~-16 ~-22 ~17 ~16 ~-1 ~40 minecraft:stone");
+            }
+            case 1215 -> {
+                mc.player.setXRot(35F); mc.player.setYRot(0F);
+                server(mc, p -> { p.setXRot(35F); p.setYRot(0F); p.setYHeadRot(0F); });
+                cmd(mc, "draviti eter @s 1000");
+            }
+            case 1220 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "cielo_negro", true));
+            case 1400 -> server(mc, p -> {
+                var lvl = p.serverLevel();
+                var base = p.blockPosition();
+                int air = 0;
+                for (int x = -16; x <= 16; x++) for (int z = -16; z <= 40; z++) for (int y = -22; y <= -1; y++)
+                    if (lvl.getBlockState(base.offset(x, y, z)).isAir()) air++;
+                LOG.info("DRAVITI_PLAYTEST cielo_negro bloques_rotos={} (esfera r=8 bajo el suelo ~1070)", air);
+            });
+            case 1405 -> { mc.options.setCameraType(CameraType.THIRD_PERSON_BACK); mc.player.setXRot(55F); }
+            case 1415 -> shot(mc, "20_cielo_negro");
+            case 1420 -> { state(mc, "fin"); LOG.info("DRAVITI_PLAYTEST_DONE"); mc.stop(); }
             default -> {}
         }
     }
