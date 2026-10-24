@@ -85,10 +85,9 @@ public final class FieldDomes {
             float r = d.radius * scale * (1 - close * 0.15F);
 
             // Misma esfera de energía que las demás técnicas de área
-            AreaSpheres.draw(pose, buf, d.pos, cam, r, d.violet, 0.8F * alpha, age);
+            AreaSpheres.draw(pose, buf, d.pos, cam, r, d.violet, 0.8F * alpha, age, EnergySphere.Style.HEX);
         }
-        buf.endBatch(EnergySphere.white());
-        buf.endBatch(EnergySphere.swirl());
+        EnergySphere.endBatch(buf);
     }
 
     /** Esfera UV (solo la parte de arriba del suelo hacia arriba se ve, la de abajo queda enterrada). */

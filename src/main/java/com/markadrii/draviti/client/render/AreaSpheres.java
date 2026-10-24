@@ -30,16 +30,20 @@ import java.util.List;
 public final class AreaSpheres {
     public enum Kind { BURST, IMPLODE }
 
-    private record Sphere(Vec3 pos, float radius, Kind kind, int life, boolean violet, int born) {}
+    private record Sphere(Vec3 pos, float radius, Kind kind, int life, boolean violet, int born, EnergySphere.Style style) {}
 
     private static final List<Sphere> LIST = new ArrayList<>();
 
     private AreaSpheres() {}
 
     public static void add(Vec3 pos, float radius, Kind kind, int life, boolean violet) {
+        add(pos, radius, kind, life, violet, EnergySphere.Style.SWIRL);
+    }
+
+    public static void add(Vec3 pos, float radius, Kind kind, int life, boolean violet, EnergySphere.Style style) {
         if (radius <= 0.2F) return;
         if (LIST.size() > 40) LIST.remove(0);
-        LIST.add(new Sphere(pos, radius, kind, Math.max(6, life), violet, ClientVisuals.ticks()));
+        LIST.add(new Sphere(pos, radius, kind, Math.max(6, life), violet, ClientVisuals.ticks(), style));
     }
 
     public static void clear() { LIST.clear(); }
@@ -74,7 +78,7 @@ public final class AreaSpheres {
                 radius = s.radius() * (0.3F + 0.7F * (1 - (1 - grow) * (1 - grow)));
                 alpha = t < 0.5F ? 1.15F : 1.15F * (1 - (t - 0.5F) / 0.5F);
             }
-            draw(pose, buf, s.pos(), cam, radius, s.violet(), alpha, age);
+            draw(pose, buf, s.pos(), cam, radius, s.violet(), alpha, age, s.style());
             any = true;
         }
 
@@ -85,19 +89,17 @@ public final class AreaSpheres {
             float age = ClientVisuals.activeTicks(p, Gravity.POWER_ID + "/antigravedad") + pt;
             float in = Mth.clamp(age / 6F, 0, 1);
             float radius = (1.35F + 0.04F * Mth.sin(age * 0.3F)) * (0.6F + 0.4F * in);
-            draw(pose, buf, c, cam, radius, Gravity.fullOverdrive(p), 0.55F * in, age);
+            draw(pose, buf, c, cam, radius, Gravity.fullOverdrive(p), 0.55F * in, age, EnergySphere.Style.CELLS);
             any = true;
         }
-        if (any) {
-            buf.endBatch(EnergySphere.white());
-            buf.endBatch(EnergySphere.swirl());
-        }
+        if (any) EnergySphere.endBatch(buf);
     }
 
-    static void draw(PoseStack pose, MultiBufferSource buf, Vec3 pos, Vec3 cam, float radius, boolean violet, float alpha, float age) {
+    static void draw(PoseStack pose, MultiBufferSource buf, Vec3 pos, Vec3 cam, float radius, boolean violet, float alpha, float age,
+                     EnergySphere.Style style) {
         pose.pushPose();
         pose.translate(pos.x - cam.x, pos.y - cam.y, pos.z - cam.z);
-        EnergySphere.draw(pose, buf, radius, cam.subtract(pos), violet ? EnergySphere.VIOLET : EnergySphere.TEAL, alpha, age);
+        EnergySphere.draw(pose, buf, radius, cam.subtract(pos), violet ? EnergySphere.VIOLET : EnergySphere.TEAL, alpha, age, style);
         pose.popPose();
     }
 }

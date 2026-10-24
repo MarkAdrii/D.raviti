@@ -80,12 +80,16 @@ public final class GravityFx {
     /** true = el efecto es solo la esfera (no se dibuja el de partículas de antes). */
     private static boolean areaSphere(FxPacket p, Vec3 pos) {
         boolean violet = p.tier() >= 2;
+        var A = com.markadrii.draviti.client.render.AreaSpheres.class;
         var B = com.markadrii.draviti.client.render.AreaSpheres.Kind.BURST;
+        var S = com.markadrii.draviti.client.render.EnergySphere.Style.class;
         switch (p.type()) {
             case Fx.SHOCKWAVE -> {
                 // Las pequeñas (al pisar, al transformarse) siguen siendo anillos en el suelo
                 if (p.a() < 3.5F) return false;
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.2, 0), p.a(), B, 28, violet);
+                // Peso Infernal: bandas de presión que bajan
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.2, 0), p.a(), B, 28, violet,
+                        com.markadrii.draviti.client.render.EnergySphere.Style.BANDS);
                 return true;
             }
             case Fx.SPIN_RING -> {
@@ -93,23 +97,31 @@ public final class GravityFx {
                 return false;
             }
             case Fx.SPIRAL -> {
+                // Onda Gravitatoria: espiral que se cierra hacia ti
                 com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.5, 0), p.a(),
-                        com.markadrii.draviti.client.render.AreaSpheres.Kind.IMPLODE, Math.max(20, (int) p.b()), violet);
+                        com.markadrii.draviti.client.render.AreaSpheres.Kind.IMPLODE, Math.max(20, (int) p.b()), violet,
+                        com.markadrii.draviti.client.render.EnergySphere.Style.SPIRAL);
                 return true;
             }
             case Fx.IMPACT -> {
                 // Patadas (Cometa, Placaje): sin esfera
                 if (p.b() == 3) return false;
-                // La esfera y además el polvo del cráter
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.3, 0), p.a() * 1.1F, B, 18, violet);
+                // Grietas de luz (Cielo Negro: vacío con estrellas); además el polvo del cráter
+                var st = p.b() == 2 ? com.markadrii.draviti.client.render.EnergySphere.Style.VOID
+                        : com.markadrii.draviti.client.render.EnergySphere.Style.CRACKS;
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.3, 0), p.a() * 1.1F, B, 18, violet, st);
                 return false;
             }
             case Fx.SPHERE_BURST -> {
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.2F, B, 20, violet);
+                // Cañón: pompa de celdas; Meteor Breaker: grietas
+                var st = p.b() > 0 ? com.markadrii.draviti.client.render.EnergySphere.Style.CRACKS
+                        : com.markadrii.draviti.client.render.EnergySphere.Style.CELLS;
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.2F, B, 20, violet, st);
                 return false;
             }
             case Fx.BLACK_SKY_BURST -> {
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.4F, B, 34, violet);
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a() * 1.4F, B, 34, violet,
+                        com.markadrii.draviti.client.render.EnergySphere.Style.VOID);
                 return false;
             }
             default -> { return false; }

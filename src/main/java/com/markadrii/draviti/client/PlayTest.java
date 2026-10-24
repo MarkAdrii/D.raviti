@@ -189,7 +189,7 @@ public final class PlayTest {
             case 1030 -> { cmd(mc, "draviti eter @s 1000"); server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "peso_infernal", true)); }
             case 1036 -> shot(mc, "15_peso_infernal");
             case 1060 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "onda_gravitatoria", true));
-            case 1078 -> shot(mc, "16_onda");
+            case 1072 -> shot(mc, "16_onda");
             case 1110 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "patada_molinete", true));
             case 1114 -> shot(mc, "17_patada");
             case 1140 -> server(mc, p -> com.markadrii.draviti.data.PowerManager.onKey(p, Gravity.POWER_ID, "campo_gravitatorio", true));
