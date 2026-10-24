@@ -85,11 +85,11 @@ public final class GravityFx {
             case Fx.SHOCKWAVE -> {
                 // Las pequeñas (al pisar, al transformarse) siguen siendo anillos en el suelo
                 if (p.a() < 3.5F) return false;
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.2, 0), p.a(), B, 22, violet);
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos.add(0, 0.2, 0), p.a(), B, 28, violet);
                 return true;
             }
             case Fx.SPIN_RING -> {
-                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a(), B, 14, violet);
+                com.markadrii.draviti.client.render.AreaSpheres.add(pos, p.a(), B, 22, violet);
                 return true;
             }
             case Fx.SPIRAL -> {

@@ -70,9 +70,9 @@ public final class AreaSpheres {
                 alpha = Mth.clamp(age / 4F, 0, 1) * (0.55F + 0.45F * t) * (t > 0.85F ? (1 - t) / 0.15F : 1);
             } else {
                 // Crece con un frenazo al final y se desvanece
-                float grow = Mth.clamp(t / 0.35F, 0, 1);
-                radius = s.radius() * (0.25F + 0.75F * (1 - (1 - grow) * (1 - grow)));
-                alpha = t < 0.35F ? 1 : 1 - (t - 0.35F) / 0.65F;
+                float grow = Mth.clamp(t / 0.3F, 0, 1);
+                radius = s.radius() * (0.3F + 0.7F * (1 - (1 - grow) * (1 - grow)));
+                alpha = t < 0.5F ? 1.15F : 1.15F * (1 - (t - 0.5F) / 0.5F);
             }
             draw(pose, buf, s.pos(), cam, radius, s.violet(), alpha, age);
             any = true;
